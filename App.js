@@ -1,9 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, SafeAreaView } from "react-native";
-import LandingScreen from "./app/screens/LandingScreen";
+import AppStackNavigator from "./StackNavigator";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
-  return <LandingScreen />;
+  return (
+    <NavigationContainer>
+      <AppStackNavigator />
+    </NavigationContainer>
+  )
 }
 
 const styles = StyleSheet.create({

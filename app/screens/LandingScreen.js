@@ -1,22 +1,36 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, View, Text, Button } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import Colors from "../../Colors";
 
-function LandingScreen(props) {
+function LandingScreen({ navigation }) {
+  const showAlert = () =>
+    Alert.alert(
+      "Oops",
+      "Brandon hasn't created this function yet, please try later."
+    );
+  const goToLoginScreen = () => {
+    navigation.navigate("LoginScreen");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>SipScore</Text>
+        <Text style={styles.titleText}>Sip Score</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <Button
-          title="Sign In"
-          onPress={() => console.log("Sign In Pressed")}
-        />
-        <Button
-          title="Sign Up"
-          onPress={() => console.log("Sign Up Pressed")}
-        />
+        <TouchableOpacity style={styles.button} onPress={goToLoginScreen}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={showAlert}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -26,7 +40,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#F8F1E5",
+    backgroundColor: Colors.cream,
   },
   titleContainer: {
     marginBottom: 30,
@@ -34,8 +48,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     marginTop: 180,
-    color: "#708090",
-    fontSize: 50,
+    color: Colors.brown,
+    fontSize: 60,
     textAlign: "center",
   },
   buttonContainer: {
@@ -43,6 +57,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     width: "80%",
     marginTop: 50,
+  },
+  button: {
+    backgroundColor: Colors.gray,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 120,
+    height: 50,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
