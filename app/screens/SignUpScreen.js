@@ -110,12 +110,13 @@ const styles = StyleSheet.create({
   },
   input: {
     height: hp("7%"),
-    width: "90%",
-    marginVertical: hp("1%"),
-    borderWidth: 2,
-    padding: wp("2.5%"),
-    borderRadius: 5,
-    borderColor: Colors.gold,
+        width: "90%",
+        marginVertical: hp("1%"),
+        borderWidth: 2,
+        padding: wp("2.5%"),
+        borderRadius: 5,
+        borderColor: Colors.gold,
+        marginLeft: 20,
   },
   button: {
     backgroundColor: Colors.copper,
@@ -124,6 +125,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: hp("1%"),
     width: "90%",
+    marginLeft: 20,
   },
   buttonText: {
     color: "#fff",

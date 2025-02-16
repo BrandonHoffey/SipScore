@@ -3,6 +3,17 @@ import { StyleSheet, Text, View, Image, SafeAreaView } from "react-native";
 import AppStackNavigator from "./StackNavigator";
 import { NavigationContainer } from "@react-navigation/native";
 
+import axios from 'axios';
+
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/users');
+    console.log(response.data);
+  } catch (error) {
+    console.error('Error fetching users', error);
+  }
+};
+
 export default function App() {
   return (
     <NavigationContainer>
