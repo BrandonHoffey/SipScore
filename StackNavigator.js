@@ -9,6 +9,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Colors from "./Colors";
 import LoginScreen from "./app/screens/LoginScreen";
+import SignUpScreen from "./app/screens/SignUpScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +51,11 @@ const StackNavigator = () => {
       <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignUpScreen"
+        component={SignUpScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

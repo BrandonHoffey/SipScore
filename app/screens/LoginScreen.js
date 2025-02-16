@@ -14,8 +14,9 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import SignUpScreen from "./SignUpScreen";
 
-function LoginScreen(props) {
+function LoginScreen({navigation}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -69,10 +70,8 @@ function LoginScreen(props) {
       <Text style={styles.forgotPassword}>I forgot my password</Text>
       <View style={styles.signupContainer}>
         <Text>Don't have an account?</Text>
-        <TouchableOpacity>
-          <Text style={styles.signupText}>
-            Click Here
-          </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("SignUpScreen")}>
+          <Text style={styles.signupText}>Tap Here</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -87,19 +86,13 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 30,
-    marginTop: 20,
+    marginTop: 0,
   },
   titleText: {
-    marginTop: 180,
+    marginTop: 110,
     color: Colors.gray,
     fontSize: 60,
     textAlign: "center",
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
   },
   inputContainer: {
     flexDirection: "row",
