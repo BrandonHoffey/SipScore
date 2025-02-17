@@ -11,11 +11,13 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
 import Colors from "../../Colors";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import { API_NEW_USER } from "../../constants/Endpoints";
 
 function SignUpScreen(props) {
   const [username, setUsername] = useState("");
@@ -23,11 +25,35 @@ function SignUpScreen(props) {
   const [passwordCheck, setPasswordCheck] = useState("");
   const [email, setEmail] = useState("");
 
-  const showAlert = () =>
-    Alert.alert(
-      "Oops",
-      "Brandon hasn't created this function yet, please try later."
-    );
+
+  const showAlert = (message) =>
+    Alert.alert("Error", message);
+
+  const handleCreateAccount = async () => {
+    if (!username || !email || !password || !passwordCheck) {
+      return showAlert("Please fill in all fields.");
+    }
+
+    if (password !== passwordCheck) {
+      return showAlert("Passwords do not match.");
+    }
+
+    try {
+      const apiUrl = "http://localhost:5000/api/users";
+
+      const response = await axios.post(apiUrl, {
+        username,
+        email,
+        password,
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Success", "Account created successfully!");
+      }
+    } catch (error) {
+      showAlert("Failed to create account. Please try again later.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,7 +101,7 @@ function SignUpScreen(props) {
               secureTextEntry
             />
           </View>
-          <TouchableOpacity style={styles.button} onPress={showAlert}>
+          <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
         </ScrollView>
