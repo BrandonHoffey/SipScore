@@ -13,21 +13,20 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import Colors from "../../Colors";
+import LoginScreen from "./LoginScreen";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { API_NEW_USER } from "../../constants/Endpoints";
 
-function SignUpScreen(props) {
+function SignUpScreen({ navigation }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
   const [email, setEmail] = useState("");
 
-
-  const showAlert = (message) =>
-    Alert.alert("Error", message);
+  const showAlert = (message) => Alert.alert("Error", message);
 
   const handleCreateAccount = async () => {
     if (!username || !email || !password || !passwordCheck) {
@@ -39,7 +38,11 @@ function SignUpScreen(props) {
     }
 
     try {
-      const apiUrl = "http://localhost:5000/api/users";
+      //! Emulator
+      const apiUrl = "http://10.0.2.2:5000/api/users";
+
+      //! Physical Device
+      // const apiUrl = "http://10.0.0.155:5000/api/users";
 
       const response = await axios.post(apiUrl, {
         username,
@@ -49,6 +52,7 @@ function SignUpScreen(props) {
 
       if (response.status === 201) {
         Alert.alert("Success", "Account created successfully!");
+        navigation.navigate("LoginScreen");
       }
     } catch (error) {
       showAlert("Failed to create account. Please try again later.");
@@ -136,13 +140,13 @@ const styles = StyleSheet.create({
   },
   input: {
     height: hp("7%"),
-        width: "90%",
-        marginVertical: hp("1%"),
-        borderWidth: 2,
-        padding: wp("2.5%"),
-        borderRadius: 5,
-        borderColor: Colors.gold,
-        marginLeft: 20,
+    width: "90%",
+    marginVertical: hp("1%"),
+    borderWidth: 2,
+    padding: wp("2.5%"),
+    borderRadius: 5,
+    borderColor: Colors.gold,
+    marginLeft: 20,
   },
   button: {
     backgroundColor: Colors.copper,
