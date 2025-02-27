@@ -13,7 +13,7 @@ router.post("/users", async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Hashed password:", hashedPassword);
-
+ 
     const newUser = new User({ username, email, password: hashedPassword });
 
     const savedUser = await newUser.save();

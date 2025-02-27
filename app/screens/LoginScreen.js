@@ -33,8 +33,8 @@ function LoginScreen({ navigation }) {
     }
 
     try {
-      const apiUrl = "http://10.0.2.2:5000/api/login"; // For emulator
-      // const apiUrl = "http://10.0.0.155:5000/api/login"; // For physical device
+      const apiUrl = "http://10.0.2.2:5000/api/login";
+      // const apiUrl = "http://10.0.0.155:5000/api/login";
 
       const response = await axios.post(apiUrl, {
         username,
