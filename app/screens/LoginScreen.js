@@ -14,9 +14,10 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import SignUpScreen from "./SignUpScreen";
+import { API_USER_SIGNIN } from "../../constants/Endpoints";
+import axios from "axios";
 
-function LoginScreen({navigation}) {
+function LoginScreen({ navigation }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -25,11 +26,34 @@ function LoginScreen({navigation}) {
     setPasswordVisible(!passwordVisible);
   };
 
-  const showAlert = () =>
-    Alert.alert(
-      "Oops",
-      "Brandon hasn't created this function yet, please try later."
-    );
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert("Error", "Please enter both username and password.");
+      return;
+    }
+
+    try {
+      const apiUrl = "http://10.0.2.2:5000/api/login"; // For emulator
+      // const apiUrl = "http://10.0.0.155:5000/api/login"; // For physical device
+
+      const response = await axios.post(apiUrl, {
+        username,
+        password,
+      });
+
+      if (response.status === 200) {
+        console.log("Successful Login");
+        console.log(response.data);
+        Alert.alert("Success", "Login successful!");
+        navigation.navigate("HomeScreen");
+      } else {
+        Alert.alert("Login Failed", "Invalid username or password.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("Error", "Something went wrong. Please try again later.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,7 +66,7 @@ function LoginScreen({navigation}) {
           onChangeText={setUsername}
           value={username}
           placeholder="Username"
-          keyboardType="keyboard"
+          keyboardType="default"
         />
       </View>
       <View style={styles.inputContainer}>
@@ -64,7 +88,7 @@ function LoginScreen({navigation}) {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={showAlert}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <Text style={styles.forgotPassword}>I forgot my password</Text>
