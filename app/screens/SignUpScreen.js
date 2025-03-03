@@ -39,10 +39,10 @@ function SignUpScreen({ navigation }) {
 
     try {
       //! Emulator
-      const apiUrl = "http://10.0.2.2:5000/api/users";
+      // const apiUrl = "http://10.0.2.2:5000/api/users";
 
       //! Physical Device
-      // const apiUrl = "http://10.0.0.155:5000/api/users";
+      const apiUrl = "http://10.0.0.155:5000/api/users";
 
       const response = await axios.post(apiUrl, {
         username,

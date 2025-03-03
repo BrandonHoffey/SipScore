@@ -1,19 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
+import { useUser } from "../../context/UserContext";
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from "react-native-responsive-screen";
 
-function HomeScreen(props) {
+function HomeScreen() {
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user) {
+      console.log("Logged in user:", user);
+    }
+  }, [user]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text>Hello from HomeScreen!</Text>
+        {user ? (
+          <Text style={styles.username}>Welcome, {user.username}!</Text>
+        ) : (
+          <Text>Loading...</Text>
+        )}
       </View>
     </SafeAreaView>
   );
 }
-
-export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -21,4 +36,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.cream,
   },
+  username: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: Colors.copper,
+    marginTop: 20,
+  },
 });
+
+export default HomeScreen;

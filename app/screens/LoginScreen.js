@@ -9,15 +9,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { useUser } from "../../context/UserContext";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { API_USER_SIGNIN } from "../../constants/Endpoints";
 import axios from "axios";
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from "react-native-responsive-screen";
 
 function LoginScreen({ navigation }) {
+  const { login } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -33,8 +34,7 @@ function LoginScreen({ navigation }) {
     }
 
     try {
-      const apiUrl = "http://10.0.2.2:5000/api/login";
-      // const apiUrl = "http://10.0.0.155:5000/api/login";
+      const apiUrl = "http://10.0.0.155:5000/api/login";
 
       const response = await axios.post(apiUrl, {
         username,
@@ -45,6 +45,9 @@ function LoginScreen({ navigation }) {
         console.log("Successful Login");
         console.log(response.data);
         Alert.alert("Success", "Login successful!");
+
+        login(response.data);
+
         navigation.navigate("HomeScreen");
       } else {
         Alert.alert("Login Failed", "Invalid username or password.");
