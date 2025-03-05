@@ -42,7 +42,7 @@ function SignUpScreen({ navigation }) {
       // const apiUrl = "http://10.0.2.2:5000/api/users";
 
       //! Physical Device
-      const apiUrl = "http://10.0.0.155:5000/api/users";
+      const apiUrl = "https://18c1-2601-282-4303-1fc0-e09e-70ca-25c1-5286.ngrok-free.app/api/users";
 
       const response = await axios.post(apiUrl, {
         username,
@@ -50,12 +50,22 @@ function SignUpScreen({ navigation }) {
         password,
       });
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         Alert.alert("Success", "Account created successfully!");
         navigation.navigate("LoginScreen");
       }
     } catch (error) {
-      showAlert("Failed to create account. Please try again later.");
+      console.error("Error creating account:", error.response || error.message);
+
+      if (error.response && error.response.data) {
+        if (error.response.data.message === "Email is already in use") {
+          showAlert("The email address is already associated with an account.");
+        } else {
+          showAlert("Failed to create account. Please try again later.");
+        }
+      } else {
+        showAlert("An unknown error occurred. Please try again later.");
+      }
     }
   };
 

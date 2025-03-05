@@ -34,7 +34,7 @@ function LoginScreen({ navigation }) {
     }
 
     try {
-      const apiUrl = "http://10.0.0.155:5000/api/login";
+      const apiUrl = "https://18c1-2601-282-4303-1fc0-e09e-70ca-25c1-5286.ngrok-free.app/api/login";
 
       const response = await axios.post(apiUrl, {
         username,

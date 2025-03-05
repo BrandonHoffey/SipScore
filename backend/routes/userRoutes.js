@@ -2,6 +2,8 @@ const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
 const bcrypt = require("bcrypt");
+const validateSession = require("../middleware/Validate-Session");
+const jwt = require("jsonwebtoken");
 
 router.post("/users", async (req, res) => {
   const { username, email, password } = req.body;
@@ -13,13 +15,19 @@ router.post("/users", async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Hashed password:", hashedPassword);
- 
+
     const newUser = new User({ username, email, password: hashedPassword });
 
     const savedUser = await newUser.save();
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: 7 * 24 * 60 * 60,
+    });
+    res.json({
+      message: "Created Account Successfully",
+      createdAccount: newUser,
+      token,
+    });
     console.log("User saved:", savedUser);
-
-    res.status(201).json(savedUser);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -58,6 +66,43 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/view-all", validateSession, async (req, res) => {
+  try {
+    const users = await User.find();
+    if (!users || users.length === 0) {
+      throw new Error("Users not found");
+    }
+
+    res.json({
+      message: "Viewing all successfully",
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/current-account", validateSession, async (req, res) => {
+  try {
+    const id = req.user.id;
+    const user = await User.findById(id).select(
+      "_id username displayName profilePicture status sentFriendRequests friendRequests friends"
+    );
+    if (!user) {
+      console.error("User not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "Account Viewing Successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error fetching user account:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
