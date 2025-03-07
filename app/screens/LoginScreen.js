@@ -8,17 +8,17 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Colors from "../../Colors";
-import { useUser } from "../../context/UserContext";
+import { useUser } from "../../context/UserContext"; // Import useUser hook
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import { API_USER_SIGNIN, API_CURRENT_ACCOUNT } from "../../constants/Endpoints"; // Ensure both API URLs are imported
 
 function LoginScreen({ navigation }) {
-  const { login } = useUser();
+  const { login, user } = useUser(); // Use the login function and user data from context
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -34,7 +34,11 @@ function LoginScreen({ navigation }) {
     }
 
     try {
-      const apiUrl = "https://18c1-2601-282-4303-1fc0-e09e-70ca-25c1-5286.ngrok-free.app/api/login";
+      const apiUrl = API_USER_SIGNIN;
+      console.log("API User Signin URL: ", API_USER_SIGNIN);
+
+      // Log the request payload for debugging
+      console.log("Login Payload:", { username, password });
 
       const response = await axios.post(apiUrl, {
         username,
@@ -43,11 +47,31 @@ function LoginScreen({ navigation }) {
 
       if (response.status === 200) {
         console.log("Successful Login");
-        console.log(response.data);
+        console.log(response.data); // Log the login response
+
+        // Store the user data in context
+        login(response.data); 
+
+        // Now, fetch the current user information from the /current-account endpoint using the token
+        const userInfoResponse = await axios.get(API_CURRENT_ACCOUNT, {
+          headers: {
+            Authorization: `Bearer ${response.data.token}`, // Pass the token in the Authorization header
+          },
+        });
+
+        // Log the user information
+        if (userInfoResponse.status === 200) {
+          console.log("Fetched current user details:");
+          console.log(userInfoResponse.data); // Logs the user's details
+
+          // Log a message with the current user's username
+          console.log(`The current user is ${userInfoResponse.data.user.username}`);
+        } else {
+          console.error("Failed to fetch user details");
+        }
+
+        // Navigate to HomeScreen
         Alert.alert("Success", "Login successful!");
-
-        login(response.data);
-
         navigation.navigate("HomeScreen");
       } else {
         Alert.alert("Login Failed", "Invalid username or password.");

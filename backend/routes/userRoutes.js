@@ -62,7 +62,20 @@ router.post("/login", async (req, res) => {
     }
 
     console.log("Login successful!");
-    res.status(200).json({ message: "Sign-in successful", user });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: 7 * 24 * 60 * 60,
+    });
+
+    res.status(200).json({
+      message: "Sign-in successful",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+      token: token,
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: error.message });
@@ -88,9 +101,7 @@ router.get("/view-all", validateSession, async (req, res) => {
 router.get("/current-account", validateSession, async (req, res) => {
   try {
     const id = req.user.id;
-    const user = await User.findById(id).select(
-      "_id username displayName profilePicture status sentFriendRequests friendRequests friends"
-    );
+    const user = await User.findById(id).select("username email password");
     if (!user) {
       console.error("User not found");
       return res.status(404).json({ error: "User not found" });

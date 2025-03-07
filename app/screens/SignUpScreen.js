@@ -42,7 +42,7 @@ function SignUpScreen({ navigation }) {
       // const apiUrl = "http://10.0.2.2:5000/api/users";
 
       //! Physical Device
-      const apiUrl = "https://18c1-2601-282-4303-1fc0-e09e-70ca-25c1-5286.ngrok-free.app/api/users";
+      const apiUrl = API_NEW_USER;
 
       const response = await axios.post(apiUrl, {
         username,
