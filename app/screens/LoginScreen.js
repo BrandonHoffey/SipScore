@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Colors from "../../Colors";
 import {
   View,
   Text,
@@ -8,17 +9,20 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useUser } from "../../context/UserContext"; // Import useUser hook
+import { useUser } from "../../context/UserContext";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import { API_USER_SIGNIN, API_CURRENT_ACCOUNT } from "../../constants/Endpoints"; // Ensure both API URLs are imported
+import {
+  API_USER_SIGNIN,
+  API_CURRENT_ACCOUNT,
+} from "../../constants/Endpoints";
 
 function LoginScreen({ navigation }) {
-  const { login, user } = useUser(); // Use the login function and user data from context
+  const { login, user } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -50,27 +54,25 @@ function LoginScreen({ navigation }) {
         console.log(response.data); // Log the login response
 
         // Store the user data in context
-        login(response.data); 
+        login(response.data);
 
-        // Now, fetch the current user information from the /current-account endpoint using the token
         const userInfoResponse = await axios.get(API_CURRENT_ACCOUNT, {
           headers: {
-            Authorization: `Bearer ${response.data.token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${response.data.token}`,
           },
         });
 
-        // Log the user information
         if (userInfoResponse.status === 200) {
           console.log("Fetched current user details:");
-          console.log(userInfoResponse.data); // Logs the user's details
+          console.log(userInfoResponse.data);
 
-          // Log a message with the current user's username
-          console.log(`The current user is ${userInfoResponse.data.user.username}`);
+          console.log(
+            `The current user is ${userInfoResponse.data.user.username}`
+          );
         } else {
           console.error("Failed to fetch user details");
         }
 
-        // Navigate to HomeScreen
         Alert.alert("Success", "Login successful!");
         navigation.navigate("HomeScreen");
       } else {

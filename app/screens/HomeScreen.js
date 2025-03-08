@@ -21,7 +21,7 @@ function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <View>
         {user ? (
-          <Text style={styles.username}>Welcome, {user.username}!</Text>
+          <Text style={styles.username}>Welcome!</Text>
         ) : (
           <Text>Loading...</Text>
         )}
