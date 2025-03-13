@@ -39,20 +39,12 @@ function LoginScreen({ navigation }) {
 
     try {
       const apiUrl = API_USER_SIGNIN;
-      console.log("API User Signin URL: ", API_USER_SIGNIN);
-
-      // Log the request payload for debugging
-      console.log("Login Payload:", { username, password });
-
       const response = await axios.post(apiUrl, {
         username,
         password,
       });
 
       if (response.status === 200) {
-        console.log("Successful Login");
-        console.log(response.data); // Log the login response
-
         // Store the user data in context
         login(response.data);
 
@@ -63,12 +55,6 @@ function LoginScreen({ navigation }) {
         });
 
         if (userInfoResponse.status === 200) {
-          console.log("Fetched current user details:");
-          console.log(userInfoResponse.data);
-
-          console.log(
-            `The current user is ${userInfoResponse.data.user.username}`
-          );
         } else {
           console.error("Failed to fetch user details");
         }

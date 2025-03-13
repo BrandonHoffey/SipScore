@@ -21,7 +21,6 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
-    console.log("Logging in user:", userData);
     setUser(userData);
     await AsyncStorage.setItem("user", JSON.stringify(userData));
   };

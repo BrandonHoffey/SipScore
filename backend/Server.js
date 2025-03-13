@@ -22,7 +22,9 @@ app.get("/", (req, res) => {
 });
 
 const userRoutes = require("./routes/userRoutes");
+const whiskeyRoutes = require("./routes/whiskeyRoutes")
 app.use("/api", userRoutes);
+app.use("/api", whiskeyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
