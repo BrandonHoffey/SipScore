@@ -7,6 +7,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import WhiskeyForm from "../extras/WhiskeyForm";
 
 function HomeScreen() {
   const { user } = useUser();
@@ -26,6 +27,9 @@ function HomeScreen() {
           <Text>Loading...</Text>
         )}
       </View>
+      <View style={styles.whiskeyForm}>
+        <WhiskeyForm />
+      </View>
     </SafeAreaView>
   );
 }
@@ -41,6 +45,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colors.copper,
     marginTop: 20,
+  },
+  whiskeyForm: {
+    marginLeft: 80,
   },
 });
 
