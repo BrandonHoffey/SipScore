@@ -7,6 +7,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,6 +19,8 @@ function WhiskeyForm(props) {
   const [savedSmellingNotes, setSavedSmellingNotes] = useState([]);
   const [savedTastingNotes, setSavedTastingNotes] = useState([]);
   const [score, setScore] = useState("");
+
+  const [showInputFields, setShowInputFields] = useState(false);
 
   const handleSmellingNoteSubmit = () => {
     if (smellingNotes.trim()) {
@@ -54,9 +57,6 @@ function WhiskeyForm(props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-          <View style={styles.title}>
-            <Text>Add A New Whiskey!</Text>
-          </View>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -95,20 +95,24 @@ function WhiskeyForm(props) {
               returnKeyType="done"
             />
           </View>
-          <ScrollView style={styles.savedNotesContainer}>
-            <Text style={styles.savedNotesTitle}>Saved Tasting Notes:</Text>
-            {savedTastingNotes.map((note, index) => (
-              <Text key={index} style={styles.savedNote}>{`• ${note}`}</Text>
-            ))}
-          </ScrollView>
-          <TextInput
-            style={styles.input}
-            value={score}
-            onChangeText={handleScoreChange}
-            placeholder="Score"
-            keyboardType="numeric"
-            returnKeyType="done"
-          />
+
+          <>
+            <ScrollView style={styles.savedNotesContainer}>
+              <Text style={styles.savedNotesTitle}>Saved Tasting Notes:</Text>
+              {savedTastingNotes.map((note, index) => (
+                <Text key={index} style={styles.savedNote}>{`• ${note}`}</Text>
+              ))}
+            </ScrollView>
+
+            <TextInput
+              style={styles.input}
+              value={score}
+              onChangeText={handleScoreChange}
+              placeholder="Score"
+              keyboardType="numeric"
+              returnKeyType="done"
+            />
+          </>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    borderWidth: 1,
   },
   scrollViewContainer: {
     flexGrow: 1,
@@ -128,9 +133,19 @@ const styles = StyleSheet.create({
   title: {
     alignItems: "center",
     marginBottom: 20,
+    flexDirection: "row",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginRight: 10,
   },
   inputContainer: {
     alignItems: "center",
+    marginBottom: 30,
+    borderWidth: 1,
   },
   input: {
     height: 40,
@@ -138,10 +153,12 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
+    borderRadius: 5,
   },
   savedNotesContainer: {
     marginTop: 20,
     width: "100%",
+    borderWidth: 1,
   },
   savedNotesTitle: {
     fontSize: 18,

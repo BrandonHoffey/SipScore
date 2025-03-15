@@ -1,15 +1,11 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
-import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
-} from "react-native-responsive-screen";
-import WhiskeyForm from "../extras/WhiskeyForm";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
-function HomeScreen() {
+function HomeScreen({ navigation }) {
   const { user } = useUser();
 
   useEffect(() => {
@@ -17,6 +13,10 @@ function HomeScreen() {
       console.log("Logged in user:", user);
     }
   }, [user]);
+
+  const handleWhiskeyForm = () => {
+    navigation.navigate("WhiskeyForm");
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,8 +27,16 @@ function HomeScreen() {
           <Text>Loading...</Text>
         )}
       </View>
-      <View style={styles.whiskeyForm}>
-        <WhiskeyForm />
+      <View style={styles.title}>
+        <Text style={styles.titleText}>Add A New Whiskey!</Text>
+        <TouchableOpacity>
+          <AntDesign
+            name="pluscircleo"
+            size={24}
+            color="black"
+            onPress={handleWhiskeyForm}
+          />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -48,6 +56,16 @@ const styles = StyleSheet.create({
   },
   whiskeyForm: {
     marginLeft: 80,
+  },
+  title: {
+    flex: 1,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  titleText: {
+    fontSize: 20,
+    marginRight: 15,
   },
 });
 

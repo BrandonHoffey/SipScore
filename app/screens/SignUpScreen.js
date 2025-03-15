@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import Colors from "../../Colors";
-import LoginScreen from "./LoginScreen";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
