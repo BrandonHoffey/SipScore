@@ -8,10 +8,12 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Colors from "../../Colors";
 
-function WhiskeyForm(props) {
+function WhiskeyForm({ props, navigation }) {
   const [name, setName] = useState("");
   const [proof, setProof] = useState("");
   const [smellingNotes, setSmellingNotes] = useState("");
@@ -19,8 +21,6 @@ function WhiskeyForm(props) {
   const [savedSmellingNotes, setSavedSmellingNotes] = useState([]);
   const [savedTastingNotes, setSavedTastingNotes] = useState([]);
   const [score, setScore] = useState("");
-
-  const [showInputFields, setShowInputFields] = useState(false);
 
   const handleSmellingNoteSubmit = () => {
     if (smellingNotes.trim()) {
@@ -50,6 +50,10 @@ function WhiskeyForm(props) {
     }
   };
 
+  const handleSubmit = () => {
+    navigation.navigate("HomeScreen");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -57,7 +61,7 @@ function WhiskeyForm(props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-          <View style={styles.inputContainer}>
+          <View style={styles.sectionContainer}>
             <TextInput
               style={styles.input}
               onChangeText={setName}
@@ -72,6 +76,9 @@ function WhiskeyForm(props) {
               placeholder="Proof"
               keyboardType="numeric"
             />
+          </View>
+
+          <View style={styles.sectionContainer}>
             <TextInput
               style={styles.input}
               onChangeText={setSmellingNotes}
@@ -80,12 +87,19 @@ function WhiskeyForm(props) {
               onSubmitEditing={handleSmellingNoteSubmit}
               returnKeyType="done"
             />
-            <ScrollView style={styles.savedNotesContainer}>
-              <Text style={styles.savedNotesTitle}>Saved Smelling Notes:</Text>
-              {savedSmellingNotes.map((note, index) => (
-                <Text key={index} style={styles.savedNote}>{`• ${note}`}</Text>
-              ))}
-            </ScrollView>
+            <View style={styles.savedNotesRow}>
+              <Text style={styles.savedNotesTitle}>Smelling Notes:</Text>
+              <View style={styles.savedNotesList}>
+                {savedSmellingNotes.map((note, index) => (
+                  <Text key={index} style={styles.savedNote}>
+                    {`• ${note}`}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.sectionContainer}>
             <TextInput
               style={styles.input}
               onChangeText={setTastingNotes}
@@ -94,16 +108,19 @@ function WhiskeyForm(props) {
               onSubmitEditing={handleTastingNoteSubmit}
               returnKeyType="done"
             />
+            <View style={styles.savedNotesRow}>
+              <Text style={styles.savedNotesTitle}>Tasting Notes:</Text>
+              <View style={styles.savedNotesList}>
+                {savedTastingNotes.map((note, index) => (
+                  <Text key={index} style={styles.savedNote}>
+                    {`• ${note}`}
+                  </Text>
+                ))}
+              </View>
+            </View>
           </View>
 
-          <>
-            <ScrollView style={styles.savedNotesContainer}>
-              <Text style={styles.savedNotesTitle}>Saved Tasting Notes:</Text>
-              {savedTastingNotes.map((note, index) => (
-                <Text key={index} style={styles.savedNote}>{`• ${note}`}</Text>
-              ))}
-            </ScrollView>
-
+          <View style={styles.sectionContainer}>
             <TextInput
               style={styles.input}
               value={score}
@@ -112,7 +129,14 @@ function WhiskeyForm(props) {
               keyboardType="numeric"
               returnKeyType="done"
             />
-          </>
+          </View>
+          <View style={styles.button}>
+            <Button
+              onPress={handleSubmit}
+              title="Submit"
+              color={Colors.copper}
+            />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -122,29 +146,19 @@ function WhiskeyForm(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.cream,
     borderWidth: 1,
   },
   scrollViewContainer: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingBottom: 80,
+    marginTop: 20,
   },
-  title: {
-    alignItems: "center",
+  sectionContainer: {
+    width: "100%",
     marginBottom: 20,
-    flexDirection: "row",
-    justifyContent: "center",
-    borderWidth: 1,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  inputContainer: {
     alignItems: "center",
-    marginBottom: 30,
     borderWidth: 1,
   },
   input: {
@@ -155,20 +169,28 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  savedNotesContainer: {
-    marginTop: 20,
-    width: "100%",
-    borderWidth: 1,
+  savedNotesRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 10,
   },
   savedNotesTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginRight: 10,
+  },
+  savedNotesList: {
+    flexDirection: "row",
   },
   savedNote: {
     fontSize: 16,
     marginBottom: 5,
+    marginLeft: 6,
   },
+  button: {
+    width: 100,
+    alignSelf: "center",
+  }
 });
 
 export default WhiskeyForm;

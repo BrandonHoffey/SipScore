@@ -58,10 +58,12 @@ const styles = StyleSheet.create({
     marginLeft: 80,
   },
   title: {
-    flex: 1,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
+    // borderWidth: 1,
+    height: 35,
+    marginTop: 100,
   },
   titleText: {
     fontSize: 20,
