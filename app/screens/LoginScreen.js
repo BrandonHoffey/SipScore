@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../context/UserContext";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -45,8 +46,9 @@ function LoginScreen({ navigation }) {
       });
 
       if (response.status === 200) {
-        // Store the user data in context
         login(response.data);
+
+        await AsyncStorage.setItem("token", response.data.token);
 
         const userInfoResponse = await axios.get(API_CURRENT_ACCOUNT, {
           headers: {

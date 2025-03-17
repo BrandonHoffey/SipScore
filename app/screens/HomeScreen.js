@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import WhiskeyList from "../extras/WhiskeyList";
 
 function HomeScreen({ navigation }) {
   const { user } = useUser();
@@ -37,6 +38,9 @@ function HomeScreen({ navigation }) {
             onPress={handleWhiskeyForm}
           />
         </TouchableOpacity>
+      </View>
+      <View>
+        <WhiskeyList />
       </View>
     </SafeAreaView>
   );

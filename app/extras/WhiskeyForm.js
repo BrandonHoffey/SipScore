@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
+import { API_USER_NEW_WHISKEY } from "../../constants/Endpoints";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function WhiskeyForm({ props, navigation }) {
   const [name, setName] = useState("");
@@ -50,8 +52,45 @@ function WhiskeyForm({ props, navigation }) {
     }
   };
 
-  const handleSubmit = () => {
-    navigation.navigate("HomeScreen");
+  const handleSubmit = async () => {
+    const whiskeyData = {
+      name,
+      proof,
+      smellingNotes: savedSmellingNotes.join(", "),
+      tastingNotes: savedTastingNotes.join(", "),
+      score: parseFloat(score),
+    };
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("No token found. Please login again.");
+      }
+
+      // Send the whiskey data to the API
+      const response = await fetch(API_USER_NEW_WHISKEY, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(whiskeyData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Whiskey added:", result);
+        navigation.navigate("HomeScreen");
+      } else {
+        console.error("Failed to add whiskey:", result.message);
+        alert(result.message || "Failed to add whiskey.");
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -190,7 +229,7 @@ const styles = StyleSheet.create({
   button: {
     width: 100,
     alignSelf: "center",
-  }
+  },
 });
 
 export default WhiskeyForm;

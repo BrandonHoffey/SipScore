@@ -12,6 +12,7 @@ import LoginScreen from "./app/screens/LoginScreen";
 import SignUpScreen from "./app/screens/SignUpScreen";
 import HomeScreen from "./app/screens/HomeScreen";
 import WhiskeyForm from "./app/extras/WhiskeyForm";
+import WhiskeyList from "./app/extras/WhiskeyList";
 
 const Stack = createNativeStackNavigator();
 
@@ -68,6 +69,11 @@ const StackNavigator = () => {
       <Stack.Screen
         name="WhiskeyForm"
         component={WhiskeyForm}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="WhiskeyList"
+        component={WhiskeyList}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
