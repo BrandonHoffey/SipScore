@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, Text, View, StyleSheet, Platform, ActivityIndicator } from "react-native";
+import {
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+  Platform,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { KeyboardAvoidingView, SafeAreaView } from "react-native";
-import axios from 'axios';
+import axios from "axios";
 import Colors from "../../Colors";
 import { API_USER_WHISKEY_LIST } from "../../constants/Endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function WhiskeyList(props) {
-  const [whiskeys, setWhiskeys] = useState([]); // State to store the whiskeys
-  const [loading, setLoading] = useState(true); // State to track loading state
+  const [whiskeys, setWhiskeys] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedWhiskeyIndex, setExpandedWhiskeyIndex] = useState(null);
 
-  // Fetch the user's whiskey list from the API
   const fetchWhiskeys = async () => {
     try {
-      // Retrieve the token from AsyncStorage
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -23,32 +30,37 @@ function WhiskeyList(props) {
 
       const response = await axios.get(API_USER_WHISKEY_LIST, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the request header
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      // If the response is successful, update the state with the whiskey list
       if (response.status === 200) {
-        setWhiskeys(response.data.whiskeys); // Assuming the API returns a `whiskeys` array
+        const topWhiskeys = response.data.whiskeys
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+
+        setWhiskeys(topWhiskeys);
       } else {
         console.error("Failed to fetch whiskeys:", response.data.message);
       }
     } catch (error) {
       console.error("Error fetching whiskeys:", error);
     } finally {
-      setLoading(false); // Stop loading once the request is done
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchWhiskeys(); // Call fetchWhiskeys when the component is mounted
+    fetchWhiskeys();
   }, []);
 
-  // If still loading, show a loading indicator
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <ScrollView contentContainerStyle={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.primary} />
           </ScrollView>
@@ -57,22 +69,56 @@ function WhiskeyList(props) {
     );
   }
 
+  const handleWhiskeyClick = (index) => {
+    if (expandedWhiskeyIndex === index) {
+      setExpandedWhiskeyIndex(null);
+    } else {
+      setExpandedWhiskeyIndex(index);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <ScrollView>
           {whiskeys.length === 0 ? (
             <View style={styles.noWhiskeysContainer}>
-              <Text style={styles.noWhiskeysText}>You haven't added any whiskeys yet.</Text>
+              <Text style={styles.noWhiskeysText}>
+                You haven't added any whiskeys yet.
+              </Text>
             </View>
           ) : (
             whiskeys.map((whiskey, index) => (
               <View key={index} style={styles.whiskeyItem}>
-                <Text style={styles.whiskeyText}>{whiskey.name}</Text>
-                <Text style={styles.whiskeyDetails}>Proof: {whiskey.proof}</Text>
-                <Text style={styles.whiskeyDetails}>Score: {whiskey.score}</Text>
-                <Text style={styles.whiskeyDetails}>Smelling Notes: {whiskey.smellingNotes}</Text>
-                <Text style={styles.whiskeyDetails}>Tasting Notes: {whiskey.tastingNotes}</Text>
+                <TouchableOpacity onPress={() => handleWhiskeyClick(index)}>
+                  <Text style={styles.whiskeyText}>{whiskey.name}</Text>
+                  <Text style={styles.whiskeyDetails}>
+                    Score: {whiskey.score}
+                  </Text>
+                </TouchableOpacity>
+
+                {expandedWhiskeyIndex === index && (
+                  <View style={styles.additionalDetails}>
+                    {whiskey.proof && (
+                      <Text style={styles.whiskeyDetails}>
+                        Proof: {whiskey.proof}
+                      </Text>
+                    )}
+                    {whiskey.smellingNotes && (
+                      <Text style={styles.whiskeyDetails}>
+                        Smelling Notes: {whiskey.smellingNotes}
+                      </Text>
+                    )}
+                    {whiskey.tastingNotes && (
+                      <Text style={styles.whiskeyDetails}>
+                        Tasting Notes: {whiskey.tastingNotes}
+                      </Text>
+                    )}
+                  </View>
+                )}
               </View>
             ))
           )}
@@ -89,8 +135,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   noWhiskeysContainer: {
     justifyContent: "center",
@@ -108,12 +154,16 @@ const styles = StyleSheet.create({
   },
   whiskeyText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.primary,
   },
   whiskeyDetails: {
     fontSize: 14,
     color: Colors.darkGray,
+  },
+  additionalDetails: {
+    marginTop: 10,
+    paddingLeft: 15,
   },
 });
 

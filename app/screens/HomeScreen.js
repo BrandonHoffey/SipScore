@@ -28,6 +28,14 @@ function HomeScreen({ navigation }) {
           <Text>Loading...</Text>
         )}
       </View>
+      <View style={styles.top3Container}>
+        <Text style={styles.top3Text}>
+          Your Top 3 Whiskeys:
+        </Text>
+      </View>
+      <View style={styles.whiskeyList}>
+        <WhiskeyList />
+      </View>
       <View style={styles.title}>
         <Text style={styles.titleText}>Add A New Whiskey!</Text>
         <TouchableOpacity>
@@ -38,9 +46,6 @@ function HomeScreen({ navigation }) {
             onPress={handleWhiskeyForm}
           />
         </TouchableOpacity>
-      </View>
-      <View>
-        <WhiskeyList />
       </View>
     </SafeAreaView>
   );
@@ -57,6 +62,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colors.copper,
     marginTop: 20,
+    // borderWidth: 1,
+  },
+  top3Container: {
+    // borderWidth: 1,
+    marginTop: 300,
+  },
+  top3Text: {
+    fontSize: 20
   },
   whiskeyForm: {
     marginLeft: 80,
@@ -65,14 +78,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    // borderWidth: 1,
     height: 35,
-    marginTop: 100,
+    marginTop: 10,
+    // borderWidth: 1,
   },
   titleText: {
     fontSize: 20,
     marginRight: 15,
   },
+  whiskeyList: {
+    // borderWidth: 1,
+    height: 280,
+    marginTop: 10,
+  }
 });
 
 export default HomeScreen;
