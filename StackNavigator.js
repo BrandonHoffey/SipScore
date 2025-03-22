@@ -1,11 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Colors from "./Colors";
 import LoginScreen from "./app/screens/LoginScreen";
@@ -17,34 +10,10 @@ import Loading from "./app/extras/Loading";
 
 const Stack = createNativeStackNavigator();
 
-const LoadingScreen = () => {
-  return (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={Colors.gray} />
-    </View>
-  );
-};
-
 const StackNavigator = () => {
-  const [initialRoute, setInitialRoute] = useState("Loading");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const handleAppLoad = async () => {
-      setTimeout(() => {
-        setInitialRoute("LoginScreen");
-        setLoading(false);
-      }, 2000);
-    };
-
-    handleAppLoad();
-  }, []);
-
-  return loading ? (
-    <LoadingScreen />
-  ) : (
+  return (
     <Stack.Navigator
-      initialRouteName={initialRoute}
+      initialRouteName="LoginScreen"
       screenOptions={{
         headerStyle: {
           backgroundColor: Colors.lightBlue,
@@ -87,12 +56,3 @@ const StackNavigator = () => {
 };
 
 export default StackNavigator;
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.lightBlue,
-  },
-});

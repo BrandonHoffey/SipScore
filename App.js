@@ -6,7 +6,6 @@ import { UserProvider } from "./context/UserContext";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 import axios from "axios";
-import Loading from "./app/extras/Loading";
 
 const fetchUsers = async () => {
   try {
@@ -21,8 +20,7 @@ export default function App() {
   return (
     <UserProvider>
       <NavigationContainer>
-        {/* <AppStackNavigator /> */}
-        <Loading />
+        <AppStackNavigator />
       </NavigationContainer>
     </UserProvider>
   );

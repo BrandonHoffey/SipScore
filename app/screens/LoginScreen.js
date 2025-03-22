@@ -21,7 +21,6 @@ import {
   API_USER_SIGNIN,
   API_CURRENT_ACCOUNT,
 } from "../../constants/Endpoints";
-import Loading from "../extras/Loading";
 
 function LoginScreen({ navigation }) {
   const { login, user } = useUser();
@@ -82,7 +81,8 @@ function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && <Loading />}
+      {/* Remove the Loading component */}
+      {/* {loading && <Loading />} */}
 
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>SipScore</Text>
