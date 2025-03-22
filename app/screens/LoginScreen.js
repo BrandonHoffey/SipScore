@@ -21,12 +21,14 @@ import {
   API_USER_SIGNIN,
   API_CURRENT_ACCOUNT,
 } from "../../constants/Endpoints";
+import Loading from "../extras/Loading";
 
 function LoginScreen({ navigation }) {
   const { login, user } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -37,6 +39,8 @@ function LoginScreen({ navigation }) {
       Alert.alert("Error", "Please enter both username and password.");
       return;
     }
+
+    setLoading(true);
 
     try {
       const apiUrl = API_USER_SIGNIN;
@@ -57,16 +61,20 @@ function LoginScreen({ navigation }) {
         });
 
         if (userInfoResponse.status === 200) {
+          setLoading(false);
+          Alert.alert("Success", "Login successful!");
+          navigation.navigate("HomeScreen");
         } else {
+          setLoading(false);
           console.error("Failed to fetch user details");
+          Alert.alert("Error", "Failed to fetch user details.");
         }
-
-        Alert.alert("Success", "Login successful!");
-        navigation.navigate("HomeScreen");
       } else {
+        setLoading(false);
         Alert.alert("Login Failed", "Invalid username or password.");
       }
     } catch (error) {
+      setLoading(false);
       console.error("Login error:", error);
       Alert.alert("Error", "Something went wrong. Please try again later.");
     }
@@ -74,6 +82,8 @@ function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {loading && <Loading />}
+
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>SipScore</Text>
       </View>
