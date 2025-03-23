@@ -8,12 +8,10 @@ router.post("/user-whiskey", validateSession, async (req, res) => {
   const { name, proof, smellingNotes, tastingNotes, score } = req.body;
 
   if (!name || !proof || score === undefined) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all required whiskey details (name, proof, and score).",
-      });
+    return res.status(400).json({
+      message:
+        "Please provide all required whiskey details (name, proof, and score).",
+    });
   }
 
   if (score < 1 || score > 10) {
@@ -56,15 +54,14 @@ router.post("/user-whiskey", validateSession, async (req, res) => {
 
 router.get("/user-whiskey-list", validateSession, async (req, res) => {
   try {
-    // Find the user whiskey profile by userId
     const userWhiskey = await UserWhiskey.findOne({ userId: req.user.id });
 
-    // If no whiskeys are found for the user, return an appropriate message
     if (!userWhiskey) {
-      return res.status(404).json({ message: "No whiskeys found for this user." });
+      return res
+        .status(404)
+        .json({ message: "No whiskeys found for this user." });
     }
 
-    // Return all whiskeys in the user's profile
     res.status(200).json({
       message: "Whiskeys fetched successfully",
       whiskeys: userWhiskey.whiskeys,
@@ -73,5 +70,42 @@ router.get("/user-whiskey-list", validateSession, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.delete(
+  "/delete-whiskey/:whiskeyId",
+  validateSession,
+  async (req, res) => {
+    const { whiskeyId } = req.params;
+
+    try {
+      const userWhiskey = await UserWhiskey.findOne({ userId: req.user.id });
+
+      if (!userWhiskey) {
+        return res
+          .status(404)
+          .json({ message: "No whiskeys found for this user." });
+      }
+
+      const whiskeyIndex = userWhiskey.whiskeys.findIndex(
+        (whiskey) => whiskey._id.toString() === whiskeyId
+      );
+
+      if (whiskeyIndex === -1) {
+        return res.status(404).json({ message: "Whiskey not found." });
+      }
+
+      userWhiskey.whiskeys.splice(whiskeyIndex, 1);
+
+      await userWhiskey.save();
+
+      res.status(200).json({
+        message: "Whiskey removed from your profile!",
+        updatedUserWhiskey: userWhiskey,
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 module.exports = router;

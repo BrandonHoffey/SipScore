@@ -5,6 +5,7 @@ import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import WhiskeyList from "../extras/WhiskeyList";
+import UserAllWhiskey from "../extras/UserAllWhiskey";
 
 function HomeScreen({ navigation }) {
   const { user } = useUser();
@@ -19,6 +20,10 @@ function HomeScreen({ navigation }) {
     navigation.navigate("WhiskeyForm");
   };
 
+  const handleUserAllWhiskey = () => {
+    navigation.navigate("UserAllWhiskey");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -29,9 +34,8 @@ function HomeScreen({ navigation }) {
         )}
       </View>
       <View style={styles.top3Container}>
-        <Text style={styles.top3Text}>
-          Your Top 3 Whiskeys:
-        </Text>
+        <Text style={styles.top3Text}>Your Top 3 Whiskeys:</Text>
+        <Text onPress={handleUserAllWhiskey} style={styles.viewAllText}>View All</Text>
       </View>
       <View style={styles.whiskeyList}>
         <WhiskeyList />
@@ -67,12 +71,21 @@ const styles = StyleSheet.create({
   top3Container: {
     // borderWidth: 1,
     marginTop: 300,
+    flexDirection: "row",
   },
   top3Text: {
-    fontSize: 20
+    fontSize: 20,
+    // borderWidth: 1,
   },
   whiskeyForm: {
     marginLeft: 80,
+  },
+  viewAllText: {
+    color: Colors.gold,
+    // borderWidth: 1,
+    marginLeft: 75,
+    paddingTop: 4,
+    fontSize: 16,
   },
   title: {
     alignItems: "center",
@@ -88,9 +101,9 @@ const styles = StyleSheet.create({
   },
   whiskeyList: {
     // borderWidth: 1,
-    height: 280,
-    marginTop: 10,
-  }
+    height: 260,
+    marginTop: 5,
+  },
 });
 
 export default HomeScreen;
