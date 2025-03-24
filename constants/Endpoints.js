@@ -1,4 +1,4 @@
-export const DOMAIN = "https://ae86-2601-282-4303-1fc0-a09e-8c4e-7e94-6965.ngrok-free.app";
+export const DOMAIN = "https://5fc9-2601-282-4303-1fc0-e537-abc2-d8ec-3f4e.ngrok-free.app";
 export const API_NEW_USER = DOMAIN + "/api/users";
 export const API_USER_SIGNIN = DOMAIN + "/api/login";
 export const API_VIEW_ALL = DOMAIN + "/api/view-all";
@@ -6,3 +6,4 @@ export const API_CURRENT_ACCOUNT = DOMAIN + "/api/current-account";
 export const API_USER_NEW_WHISKEY = DOMAIN + "/api/user-whiskey";
 export const API_USER_WHISKEY_LIST = DOMAIN + "/api/user-whiskey-list";
 export const API_DELETE_WHISKEY = DOMAIN + "/api/delete-whiskey/:whiskeyId";
+export const API_USER_LOGOUT = DOMAIN + "/api/logout";

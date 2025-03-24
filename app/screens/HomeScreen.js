@@ -1,14 +1,32 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import WhiskeyList from "../extras/WhiskeyList";
-import UserAllWhiskey from "../extras/UserAllWhiskey";
+import axios from "axios";
+import { API_USER_LOGOUT } from "../../constants/Endpoints"; // Import the logout API endpoint
 
 function HomeScreen({ navigation }) {
-  const { user } = useUser();
+  const { user, setUser } = useUser(); // Assuming setUser is part of your UserContext
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      console.log("Page refreshed");
+    }, 2000);
+  };
 
   useEffect(() => {
     if (user) {
@@ -24,33 +42,65 @@ function HomeScreen({ navigation }) {
     navigation.navigate("UserAllWhiskey");
   };
 
+  const handleUserLogout = async () => {
+    try {
+      // Call the API to log the user out without sending credentials
+      await axios.post(API_USER_LOGOUT);
+    } catch (error) {
+      console.error("Logout failed", error);
+      // Optionally, you can handle the error here (e.g., show an error message)
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-        {user ? (
-          <Text style={styles.username}>Welcome, {user.user.username}</Text>
-        ) : (
-          <Text>Loading...</Text>
-        )}
-      </View>
-      <View style={styles.top3Container}>
-        <Text style={styles.top3Text}>Your Top 3 Whiskeys:</Text>
-        <Text onPress={handleUserAllWhiskey} style={styles.viewAllText}>View All</Text>
-      </View>
-      <View style={styles.whiskeyList}>
-        <WhiskeyList />
-      </View>
-      <View style={styles.title}>
-        <Text style={styles.titleText}>Add A New Whiskey!</Text>
-        <TouchableOpacity>
-          <AntDesign
-            name="pluscircleo"
-            size={24}
-            color="black"
-            onPress={handleWhiskeyForm}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.copper}
           />
-        </TouchableOpacity>
-      </View>
+        }
+      >
+        <View style={styles.usernameIconContainer}>
+          <View style={styles.contentWrapper}>
+            {user ? (
+              <Text style={styles.username}>Welcome, {user.user.username}</Text>
+            ) : (
+              <Text>Loading...</Text>
+            )}
+          </View>
+          <View style={styles.logoutContainer}>
+            <SimpleLineIcons onPress={handleUserLogout} name="logout" size={24} color="black" />
+          </View>
+        </View>
+
+        <View style={styles.top3Container}>
+          <Text style={styles.top3Text}>Your Top 3 Whiskeys:</Text>
+          <Text onPress={handleUserAllWhiskey} style={styles.viewAllText}>
+            View All
+          </Text>
+        </View>
+
+        <View style={styles.whiskeyList}>
+          <WhiskeyList />
+        </View>
+
+        <View style={styles.title}>
+          <Text style={styles.titleText}>Add A New Whiskey!</Text>
+          <TouchableOpacity>
+            <AntDesign
+              name="pluscircleo"
+              size={24}
+              color="black"
+              onPress={handleWhiskeyForm}
+            />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -61,28 +111,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.cream,
   },
+  scrollView: {
+    width: "100%",
+  },
+  scrollViewContent: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+  contentWrapper: {
+    width: 300,
+    alignItems: "center",
+    // borderWidth: 1,
+  },
   username: {
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.copper,
     marginTop: 20,
+  },
+  usernameIconContainer: {
+    flexDirection: "row",
     // borderWidth: 1,
+    width: "100%",
+    marginTop: 10,
+  },
+  logoutContainer: {
+    // borderWidth: 1,
+    marginLeft: 30,
   },
   top3Container: {
-    // borderWidth: 1,
     marginTop: 300,
     flexDirection: "row",
+    width: "100%",
+    justifyContent: "center",
   },
   top3Text: {
     fontSize: 20,
-    // borderWidth: 1,
-  },
-  whiskeyForm: {
-    marginLeft: 80,
   },
   viewAllText: {
     color: Colors.gold,
-    // borderWidth: 1,
     marginLeft: 75,
     paddingTop: 4,
     fontSize: 16,
@@ -93,16 +160,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 35,
     marginTop: 10,
-    // borderWidth: 1,
   },
   titleText: {
     fontSize: 20,
     marginRight: 15,
   },
   whiskeyList: {
-    // borderWidth: 1,
     height: 260,
     marginTop: 5,
+    width: "100%",
   },
 });
 
