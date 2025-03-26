@@ -7,18 +7,26 @@ import {
   Platform,
   ActivityIndicator,
   TouchableOpacity,
+  Modal,
+  Button,
 } from "react-native";
 import { KeyboardAvoidingView, SafeAreaView } from "react-native";
 import axios from "axios";
 import Colors from "../../Colors";
-import { API_USER_WHISKEY_LIST, API_DELETE_WHISKEY } from "../../constants/Endpoints";
+import {
+  API_USER_WHISKEY_LIST,
+  API_DELETE_WHISKEY,
+} from "../../constants/Endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-function UserAllWhiskey(props) {
+function UserAllWhiskey({ navigation }) {
   const [whiskeys, setWhiskeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedWhiskeyIndex, setExpandedWhiskeyIndex] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [whiskeyToDelete, setWhiskeyToDelete] = useState(null);
 
   const fetchWhiskeys = async () => {
     try {
@@ -63,7 +71,9 @@ function UserAllWhiskey(props) {
     }
   };
 
-  const handleDeleteWhiskey = async (whiskeyId) => {
+  const handleDeleteWhiskey = async () => {
+    if (!whiskeyToDelete) return;
+
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -72,17 +82,20 @@ function UserAllWhiskey(props) {
         return;
       }
 
-      const response = await axios.delete(`${API_DELETE_WHISKEY.replace(":whiskeyId", whiskeyId)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.delete(
+        `${API_DELETE_WHISKEY.replace(":whiskeyId", whiskeyToDelete)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
-        // Remove the whiskey from the local state after successful deletion
-        setWhiskeys((prevWhiskeys) => 
-          prevWhiskeys.filter((whiskey) => whiskey._id !== whiskeyId)
+        setWhiskeys((prevWhiskeys) =>
+          prevWhiskeys.filter((whiskey) => whiskey._id !== whiskeyToDelete)
         );
+        setModalVisible(false);
       } else {
         console.error("Failed to delete whiskey:", response.data.message);
       }
@@ -91,20 +104,19 @@ function UserAllWhiskey(props) {
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <ScrollView contentContainerStyle={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    );
+  const handleReturnHome = () => {
+    navigation.navigate("HomeScreen");
   }
+
+  const showModal = (whiskeyId) => {
+    setWhiskeyToDelete(whiskeyId);
+    setModalVisible(true);
+  };
+
+  const hideModal = () => {
+    setWhiskeyToDelete(null);
+    setModalVisible(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -112,72 +124,95 @@ function UserAllWhiskey(props) {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView style={styles.whiskeyItemsContainer}>
-          {whiskeys.length === 0 ? (
-            <View style={styles.noWhiskeysContainer}>
-              <Text style={styles.noWhiskeysText}>
-                You haven't added any whiskeys yet.
-              </Text>
-            </View>
-          ) : (
-            whiskeys.map((whiskey, index) => (
-              <View key={index} style={styles.whiskeyItem}>
-                {/* Container for name and score */}
-                <TouchableOpacity
-                  onPress={() => handleWhiskeyClick(index)}
-                  style={styles.whiskeyHeader}
-                >
-                  {/* Separate container for name */}
-                  <View style={styles.nameContainer}>
-                    <Text style={styles.whiskeyText}>{whiskey.name}</Text>
-                  </View>
-  
-                  {/* Separate container for score */}
-                  <View style={styles.scoreContainer}>
-                    <Text style={styles.whiskeyDetails}>Score: {whiskey.score}</Text>
-                  </View>
-                </TouchableOpacity>
-  
-                {/* Expanded details container */}
-                {expandedWhiskeyIndex === index && (
-                  <View style={styles.detailsRow}>
-                    {/* Expanded details */}
-                    <View style={styles.additionalDetails}>
-                      {whiskey.proof && (
-                        <Text style={styles.whiskeyDetails}>
-                          Proof: {whiskey.proof}
-                        </Text>
-                      )}
-                      {whiskey.smellingNotes && (
-                        <Text style={styles.whiskeyDetails}>
-                          Smelling Notes: {whiskey.smellingNotes}
-                        </Text>
-                      )}
-                      {whiskey.tastingNotes && (
-                        <Text style={styles.whiskeyDetails}>
-                          Tasting Notes: {whiskey.tastingNotes}
-                        </Text>
-                      )}
-                    </View>
-  
-                    {/* Trashcan (Delete) icon */}
-                    <TouchableOpacity
-                      onPress={() => handleDeleteWhiskey(whiskey._id)}
-                      style={styles.helloContainer}
-                    >
-                      <MaterialCommunityIcons 
-                        name="delete-forever-outline" 
-                        size={28} 
-                        color="black" 
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+        <View style={styles.homeIconContainer}>
+          <MaterialIcons onPress={handleReturnHome} name="home" size={32} color="black" />
+        </View>
+
+        {loading ? (
+          <ScrollView contentContainerStyle={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+          </ScrollView>
+        ) : (
+          <ScrollView style={styles.whiskeyItemsContainer}>
+            {whiskeys.length === 0 ? (
+              <View style={styles.noWhiskeysContainer}>
+                <Text style={styles.noWhiskeysText}>
+                  You haven't added any whiskeys yet.
+                </Text>
               </View>
-            ))
-          )}
-        </ScrollView>
+            ) : (
+              whiskeys.map((whiskey, index) => (
+                <View key={index} style={styles.whiskeyItem}>
+                  <TouchableOpacity
+                    onPress={() => handleWhiskeyClick(index)}
+                    style={styles.whiskeyHeader}
+                  >
+                    <View style={styles.nameContainer}>
+                      <Text style={styles.whiskeyText}>{whiskey.name}</Text>
+                    </View>
+
+                    <View style={styles.scoreContainer}>
+                      <Text style={styles.whiskeyDetails}>
+                        Score: {whiskey.score}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {expandedWhiskeyIndex === index && (
+                    <View style={styles.detailsRow}>
+                      <View style={styles.additionalDetails}>
+                        {whiskey.proof && (
+                          <Text style={styles.whiskeyDetails}>
+                            Proof: {whiskey.proof}
+                          </Text>
+                        )}
+                        {whiskey.smellingNotes && (
+                          <Text style={styles.whiskeyDetails}>
+                            Smelling Notes: {whiskey.smellingNotes}
+                          </Text>
+                        )}
+                        {whiskey.tastingNotes && (
+                          <Text style={styles.whiskeyDetails}>
+                            Tasting Notes: {whiskey.tastingNotes}
+                          </Text>
+                        )}
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() => showModal(whiskey._id)}
+                        style={styles.helloContainer}
+                      >
+                        <MaterialCommunityIcons
+                          name="delete-forever-outline"
+                          size={28}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              ))
+            )}
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
+
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="fade"
+        onRequestClose={hideModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Are you sure?</Text>
+            <View style={styles.modalButtons}>
+              <Button title="Maybe Not" onPress={hideModal} />
+              <Button title="I'm Sure" onPress={handleDeleteWhiskey} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -192,9 +227,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  homeIconContainer: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
+    // borderWidth: 1,
+  },
   whiskeyItemsContainer: {
     alignSelf: "center",
-    marginTop: 40,
+    marginTop: 100,
   },
   whiskeyItem: {
     padding: 15,
@@ -233,6 +275,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingLeft: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: 300,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 });
 

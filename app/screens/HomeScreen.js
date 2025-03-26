@@ -14,10 +14,10 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import WhiskeyList from "../extras/WhiskeyList";
 import axios from "axios";
-import { API_USER_LOGOUT } from "../../constants/Endpoints"; // Import the logout API endpoint
+import { API_USER_LOGOUT } from "../../constants/Endpoints";
 
 function HomeScreen({ navigation }) {
-  const { user, setUser } = useUser(); // Assuming setUser is part of your UserContext
+  const { user, setUser } = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const onRefresh = () => {
