@@ -65,6 +65,9 @@ function HomeScreen({ navigation }) {
           />
         }
       >
+          <View style={styles.logoutContainer}>
+            <SimpleLineIcons onPress={handleUserLogout} name="logout" size={24} color="black" />
+          </View>
         <View style={styles.usernameIconContainer}>
           <View style={styles.contentWrapper}>
             {user ? (
@@ -72,9 +75,6 @@ function HomeScreen({ navigation }) {
             ) : (
               <Text>Loading...</Text>
             )}
-          </View>
-          <View style={styles.logoutContainer}>
-            <SimpleLineIcons onPress={handleUserLogout} name="logout" size={24} color="black" />
           </View>
         </View>
 
@@ -130,17 +130,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   usernameIconContainer: {
-    flexDirection: "row",
     // borderWidth: 1,
     width: "100%",
-    marginTop: 10,
+    marginTop: 8,
+    alignItems: "center",
   },
   logoutContainer: {
     // borderWidth: 1,
-    marginLeft: 30,
+    marginLeft: 300,
+    marginTop: 20,
+    marginBottom: 4,
   },
   top3Container: {
-    marginTop: 300,
+    marginTop: 270,
     flexDirection: "row",
     width: "100%",
     justifyContent: "center",

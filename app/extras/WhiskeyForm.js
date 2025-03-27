@@ -68,7 +68,6 @@ function WhiskeyForm({ props, navigation }) {
         throw new Error("No token found. Please login again.");
       }
 
-      // Send the whiskey data to the API
       const response = await fetch(API_USER_NEW_WHISKEY, {
         method: "POST",
         headers: {

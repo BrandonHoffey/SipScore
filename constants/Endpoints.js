@@ -1,4 +1,4 @@
-export const DOMAIN = "https://a837-2601-282-4303-1fc0-581b-f520-e450-35.ngrok-free.app";
+export const DOMAIN = "https://1b74-2601-282-4303-1fc0-6d77-a7be-cceb-9edc.ngrok-free.app";
 export const API_NEW_USER = DOMAIN + "/api/users";
 export const API_USER_SIGNIN = DOMAIN + "/api/login";
 export const API_VIEW_ALL = DOMAIN + "/api/view-all";
