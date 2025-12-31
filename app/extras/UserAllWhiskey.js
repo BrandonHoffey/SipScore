@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
-  Button,
+  RefreshControl,
 } from "react-native";
-import { KeyboardAvoidingView, SafeAreaView } from "react-native";
+import { KeyboardAvoidingView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import Colors from "../../Colors";
 import {
@@ -19,12 +20,12 @@ import {
 } from "../../constants/Endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 function UserAllWhiskey({ navigation }) {
   const [whiskeys, setWhiskeys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedWhiskeyIndex, setExpandedWhiskeyIndex] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [whiskeyToDelete, setWhiskeyToDelete] = useState(null);
 
@@ -44,11 +45,10 @@ function UserAllWhiskey({ navigation }) {
       });
 
       if (response.status === 200) {
-        const topWhiskeys = response.data.whiskeys.sort(
+        const sortedWhiskeys = response.data.whiskeys.sort(
           (a, b) => b.score - a.score
         );
-
-        setWhiskeys(topWhiskeys);
+        setWhiskeys(sortedWhiskeys);
       } else {
         console.error("Failed to fetch whiskeys:", response.data.message);
       }
@@ -63,12 +63,9 @@ function UserAllWhiskey({ navigation }) {
     fetchWhiskeys();
   }, []);
 
-  const handleWhiskeyClick = (index) => {
-    if (expandedWhiskeyIndex === index) {
-      setExpandedWhiskeyIndex(null);
-    } else {
-      setExpandedWhiskeyIndex(index);
-    }
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    fetchWhiskeys().then(() => setIsRefreshing(false));
   };
 
   const handleDeleteWhiskey = async () => {
@@ -106,7 +103,7 @@ function UserAllWhiskey({ navigation }) {
 
   const handleReturnHome = () => {
     navigation.navigate("HomeScreen");
-  }
+  };
 
   const showModal = (whiskeyId) => {
     setWhiskeyToDelete(whiskeyId);
@@ -118,22 +115,53 @@ function UserAllWhiskey({ navigation }) {
     setModalVisible(false);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.homeIconContainer}>
-          <MaterialIcons onPress={handleReturnHome} name="home" size={32} color="black" />
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity
+            onPress={handleReturnHome}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.copper} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>SipScore</Text>
+          <View style={styles.backButton} />
+        </View>
+
+        {/* Page Title */}
+        <View style={styles.pageTitleContainer}>
+          <Text style={styles.pageTitle}>All Your Whiskeys</Text>
+          <Text style={styles.pageSubtitle}>
+            {whiskeys.length} whiskeys scored
+          </Text>
         </View>
 
         {loading ? (
-          <ScrollView contentContainerStyle={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-          </ScrollView>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.copper} />
+          </View>
         ) : (
-          <ScrollView style={styles.whiskeyItemsContainer}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollViewContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.copper}
+              />
+            }
+          >
             {whiskeys.length === 0 ? (
               <View style={styles.noWhiskeysContainer}>
                 <Text style={styles.noWhiskeysText}>
@@ -142,54 +170,60 @@ function UserAllWhiskey({ navigation }) {
               </View>
             ) : (
               whiskeys.map((whiskey, index) => (
-                <View key={index} style={styles.whiskeyItem}>
-                  <TouchableOpacity
-                    onPress={() => handleWhiskeyClick(index)}
-                    style={styles.whiskeyHeader}
-                  >
-                    <View style={styles.nameContainer}>
-                      <Text style={styles.whiskeyText}>{whiskey.name}</Text>
-                    </View>
-
-                    <View style={styles.scoreContainer}>
-                      <Text style={styles.whiskeyDetails}>
-                        Score: {whiskey.score}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  {expandedWhiskeyIndex === index && (
-                    <View style={styles.detailsRow}>
-                      <View style={styles.additionalDetails}>
-                        {whiskey.proof && (
-                          <Text style={styles.whiskeyDetails}>
-                            Proof: {whiskey.proof}
-                          </Text>
-                        )}
-                        {whiskey.smellingNotes && (
-                          <Text style={styles.whiskeyDetails}>
-                            Smelling Notes: {whiskey.smellingNotes}
-                          </Text>
-                        )}
-                        {whiskey.tastingNotes && (
-                          <Text style={styles.whiskeyDetails}>
-                            Tasting Notes: {whiskey.tastingNotes}
-                          </Text>
-                        )}
+                <View key={index} style={styles.whiskeyCard}>
+                  {/* Card Header */}
+                  <View style={styles.cardHeader}>
+                    <View style={styles.nameScoreRow}>
+                      <Text style={styles.whiskeyName}>{whiskey.name}</Text>
+                      <View style={styles.scoreBadge}>
+                        <Text style={styles.scoreText}>{whiskey.score}/10</Text>
                       </View>
-
-                      <TouchableOpacity
-                        onPress={() => showModal(whiskey._id)}
-                        style={styles.helloContainer}
-                      >
-                        <MaterialCommunityIcons
-                          name="delete-forever-outline"
-                          size={28}
-                          color="black"
-                        />
-                      </TouchableOpacity>
                     </View>
-                  )}
+                    {whiskey.dateAdded && (
+                      <Text style={styles.dateText}>
+                        Scored on {formatDate(whiskey.dateAdded)}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Card Details */}
+                  <View style={styles.cardDetails}>
+                    {whiskey.proof && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Proof</Text>
+                        <Text style={styles.detailValue}>{whiskey.proof}</Text>
+                      </View>
+                    )}
+                    {whiskey.smellingNotes && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Nose</Text>
+                        <Text style={styles.detailValue}>
+                          {whiskey.smellingNotes}
+                        </Text>
+                      </View>
+                    )}
+                    {whiskey.tastingNotes && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Palate</Text>
+                        <Text style={styles.detailValue}>
+                          {whiskey.tastingNotes}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Delete Button */}
+                  <TouchableOpacity
+                    onPress={() => showModal(whiskey._id)}
+                    style={styles.deleteButton}
+                  >
+                    <MaterialCommunityIcons
+                      name="delete-outline"
+                      size={20}
+                      color={Colors.copper}
+                    />
+                    <Text style={styles.deleteText}>Delete</Text>
+                  </TouchableOpacity>
                 </View>
               ))
             )}
@@ -197,18 +231,27 @@ function UserAllWhiskey({ navigation }) {
         )}
       </KeyboardAvoidingView>
 
+      {/* Delete Confirmation Modal */}
       <Modal
         transparent={true}
         visible={modalVisible}
         animationType="fade"
         onRequestClose={hideModal}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Are you sure?</Text>
+            <Text style={styles.modalTitle}>Delete Whiskey?</Text>
+            <Text style={styles.modalText}>This action cannot be undone.</Text>
             <View style={styles.modalButtons}>
-              <Button title="Maybe Not" onPress={hideModal} />
-              <Button title="I'm Sure" onPress={handleDeleteWhiskey} />
+              <TouchableOpacity style={styles.cancelButton} onPress={hideModal}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleDeleteWhiskey}
+              >
+                <Text style={styles.confirmButtonText}>Delete</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -222,81 +265,186 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.cream,
   },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  backButton: {
+    width: 40,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: Colors.copper,
+  },
+  pageTitleContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: Colors.copper,
+  },
+  pageSubtitle: {
+    fontSize: 14,
+    color: Colors.gray,
+    marginTop: 4,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  homeIconContainer: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    zIndex: 1,
-    // borderWidth: 1,
-  },
-  whiskeyItemsContainer: {
-    alignSelf: "center",
-    marginTop: 100,
-  },
-  whiskeyItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
-    width: 300,
-  },
-  whiskeyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  nameContainer: {
+  scrollView: {
     flex: 1,
   },
-  scoreContainer: {
-    alignItems: "flex-end",
+  scrollViewContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
   },
-  whiskeyText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.primary,
-  },
-  whiskeyDetails: {
-    fontSize: 14,
-    color: Colors.darkGray,
-  },
-  detailsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  additionalDetails: {
-    flex: 1,
-  },
-  helloContainer: {
+  noWhiskeysContainer: {
     justifyContent: "center",
     alignItems: "center",
-    paddingLeft: 1,
+    marginTop: 50,
   },
-  modalContainer: {
+  noWhiskeysText: {
+    fontSize: 16,
+    color: Colors.gray,
+  },
+  whiskeyCard: {
+    backgroundColor: Colors.copper,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardHeader: {
+    marginBottom: 12,
+  },
+  nameScoreRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  whiskeyName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    flex: 1,
+    marginRight: 10,
+  },
+  scoreBadge: {
+    backgroundColor: Colors.gold,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  scoreText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  dateText: {
+    fontSize: 12,
+    color: Colors.cream,
+    opacity: 0.8,
+    marginTop: 4,
+  },
+  cardDetails: {
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.2)",
+    paddingTop: 12,
+  },
+  detailRow: {
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontSize: 11,
+    color: Colors.gold,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: "#fff",
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.2)",
+  },
+  deleteText: {
+    fontSize: 14,
+    color: Colors.cream,
+    marginLeft: 6,
+    opacity: 0.8,
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    width: 300,
+    backgroundColor: Colors.cream,
+    padding: 24,
+    borderRadius: 12,
+    width: "80%",
     alignItems: "center",
   },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: Colors.copper,
+    marginBottom: 8,
+  },
   modalText: {
-    fontSize: 16,
+    fontSize: 14,
+    color: Colors.gray,
     marginBottom: 20,
   },
   modalButtons: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.copper,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: Colors.copper,
+    fontWeight: "600",
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.copper,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
   },
 });
 

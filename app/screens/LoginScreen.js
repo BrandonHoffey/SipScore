@@ -7,12 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../context/UserContext";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+import { Video, ResizeMode } from "expo-av";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -41,6 +43,8 @@ function LoginScreen({ navigation }) {
 
     setLoading(true);
 
+    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 3000));
+
     try {
       const apiUrl = API_USER_SIGNIN;
       const response = await axios.post(apiUrl, {
@@ -59,9 +63,11 @@ function LoginScreen({ navigation }) {
           },
         });
 
+        // Wait for minimum loading time before navigating
+        await minLoadingTime;
+
         if (userInfoResponse.status === 200) {
           setLoading(false);
-          Alert.alert("Success", "Login successful!");
           navigation.navigate("HomeScreen");
         } else {
           setLoading(false);
@@ -69,10 +75,12 @@ function LoginScreen({ navigation }) {
           Alert.alert("Error", "Failed to fetch user details.");
         }
       } else {
+        await minLoadingTime;
         setLoading(false);
         Alert.alert("Login Failed", "Invalid username or password.");
       }
     } catch (error) {
+      await minLoadingTime;
       setLoading(false);
       console.error("Login error:", error);
       Alert.alert("Error", "Something went wrong. Please try again later.");
@@ -81,8 +89,18 @@ function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Remove the Loading component */}
-      {/* {loading && <Loading />} */}
+      <Modal visible={loading} transparent animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <Video
+            source={require("../assets/SipScore-Loading-Animation.mp4")}
+            style={styles.loadingVideo}
+            resizeMode={ResizeMode.CONTAIN}
+            shouldPlay
+            isLooping
+          />
+          <Text style={styles.loadingText}>Signing you in...</Text>
+        </View>
+      </Modal>
 
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>SipScore</Text>
@@ -134,6 +152,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: Colors.cream,
+  },
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: Colors.cream,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingVideo: {
+    width: wp("80%"),
+    height: hp("40%"),
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 18,
+    color: Colors.copper,
+    fontWeight: "600",
   },
   titleContainer: {
     marginBottom: 30,

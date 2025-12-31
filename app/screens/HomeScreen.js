@@ -10,18 +10,50 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import WhiskeyList from "../extras/WhiskeyList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { API_USER_LOGOUT } from "../../constants/Endpoints";
+import { API_USER_WHISKEY_LIST } from "../../constants/Endpoints";
 
 function HomeScreen({ navigation }) {
-  const { user, setUser } = useUser();
+  const { user, logout } = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [recentWhiskey, setRecentWhiskey] = useState(null);
+  const [totalSips, setTotalSips] = useState(0);
+  const [averageScore, setAverageScore] = useState(0);
+
+  const fetchWhiskeyStats = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get(API_USER_WHISKEY_LIST, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200 && response.data.whiskeys?.length > 0) {
+        const whiskeys = response.data.whiskeys;
+
+        // Get the most recent whiskey (last in the array)
+        setRecentWhiskey(whiskeys[whiskeys.length - 1]);
+
+        // Calculate total sips
+        setTotalSips(whiskeys.length);
+
+        // Calculate average score
+        const totalScore = whiskeys.reduce((sum, w) => sum + (w.score || 0), 0);
+        const avg = totalScore / whiskeys.length;
+        setAverageScore(avg.toFixed(1));
+      }
+    } catch (error) {
+      console.error("Error fetching whiskey stats:", error);
+    }
+  };
 
   const onRefresh = () => {
     setIsRefreshing(true);
+    fetchWhiskeyStats();
     setTimeout(() => {
       setIsRefreshing(false);
       console.log("Page refreshed");
@@ -31,6 +63,7 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     if (user) {
       console.log("Logged in user:", user);
+      fetchWhiskeyStats();
     }
   }, [user]);
 
@@ -44,11 +77,11 @@ function HomeScreen({ navigation }) {
 
   const handleUserLogout = async () => {
     try {
-      // Call the API to log the user out without sending credentials
-      await axios.post(API_USER_LOGOUT);
+      await AsyncStorage.removeItem("token");
+      await logout();
+      navigation.navigate("LoginScreen");
     } catch (error) {
       console.error("Logout failed", error);
-      // Optionally, you can handle the error here (e.g., show an error message)
     }
   };
 
@@ -65,41 +98,78 @@ function HomeScreen({ navigation }) {
           />
         }
       >
-          <View style={styles.logoutContainer}>
-            <SimpleLineIcons onPress={handleUserLogout} name="logout" size={24} color="black" />
-          </View>
-        <View style={styles.usernameIconContainer}>
-          <View style={styles.contentWrapper}>
-            {user ? (
-              <Text style={styles.username}>Welcome, {user.user.username}</Text>
-            ) : (
-              <Text>Loading...</Text>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.top3Container}>
-          <Text style={styles.top3Text}>Your Top 3 Whiskeys:</Text>
-          <Text onPress={handleUserAllWhiskey} style={styles.viewAllText}>
-            View All
-          </Text>
-        </View>
-
-        <View style={styles.whiskeyList}>
-          <WhiskeyList />
-        </View>
-
-        <View style={styles.title}>
-          <Text style={styles.titleText}>Add A New Whiskey!</Text>
-          <TouchableOpacity>
-            <AntDesign
-              name="pluscircleo"
+        <View style={styles.headerContainer}>
+          <Text style={styles.sipScoreTitle}>SipScore</Text>
+          <View style={styles.logoutButton}>
+            <SimpleLineIcons
+              onPress={handleUserLogout}
+              name="logout"
               size={24}
               color="black"
-              onPress={handleWhiskeyForm}
             />
-          </TouchableOpacity>
+          </View>
         </View>
+        <View style={styles.welcomeContainer}>
+          {user ? (
+            <>
+              <Text style={styles.welcomeText}>Welcome</Text>
+              <Text style={styles.username}>{user.user.username}</Text>
+            </>
+          ) : (
+            <Text>Loading...</Text>
+          )}
+        </View>
+
+        <View style={styles.recentScoreBox}>
+          <View style={styles.recentScoreHeader}>
+            <Text style={styles.recentScoreTitle}>Your Most Recent Score</Text>
+            {recentWhiskey?.dateAdded && (
+              <Text style={styles.recentScoreDate}>
+                {new Date(recentWhiskey.dateAdded).toLocaleDateString()}
+              </Text>
+            )}
+          </View>
+          {recentWhiskey ? (
+            <View style={styles.recentScoreContent}>
+              <Text style={styles.recentWhiskeyName}>{recentWhiskey.name}</Text>
+              <Text style={styles.recentWhiskeyScore}>
+                {recentWhiskey.score}/10
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.noRecentText}>No whiskeys scored yet</Text>
+          )}
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statTitle}>Total Sips</Text>
+            <Text style={styles.statValue}>{totalSips}</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statTitle}>Average Score</Text>
+            <Text style={styles.statValue}>{averageScore}</Text>
+          </View>
+        </View>
+
+        <View style={styles.top3Box}>
+          <View style={styles.top3Header}>
+            <Text style={styles.top3Title}>Your Top 3 Whiskeys</Text>
+            <Text onPress={handleUserAllWhiskey} style={styles.viewAllText}>
+              View All
+            </Text>
+          </View>
+          <View style={styles.whiskeyListContainer}>
+            <WhiskeyList />
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.addWhiskeyButton}
+          onPress={handleWhiskeyForm}
+        >
+          <Text style={styles.addWhiskeyText}>Add A New Whiskey</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,59 +188,169 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 20,
   },
-  contentWrapper: {
-    width: 300,
-    alignItems: "center",
-    // borderWidth: 1,
+  welcomeContainer: {
+    width: "100%",
+    paddingLeft: 20,
+    marginTop: 16,
+  },
+  welcomeText: {
+    fontSize: 18,
+    color: Colors.gray,
   },
   username: {
+    fontSize: 34,
+    fontWeight: "bold",
+    color: Colors.copper,
+    marginTop: 4,
+  },
+  headerContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+    marginBottom: 4,
+    position: "relative",
+  },
+  sipScoreTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.copper,
-    marginTop: 20,
+    textAlign: "center",
   },
-  usernameIconContainer: {
-    // borderWidth: 1,
-    width: "100%",
-    marginTop: 8,
+  logoutButton: {
+    position: "absolute",
+    right: 20,
+  },
+  recentScoreBox: {
+    width: "90%",
+    backgroundColor: Colors.copper,
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  recentScoreHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  recentScoreTitle: {
+    fontSize: 14,
+    color: Colors.cream,
+    opacity: 0.9,
+  },
+  recentScoreDate: {
+    fontSize: 12,
+    color: Colors.cream,
+    opacity: 0.7,
+  },
+  recentScoreContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  logoutContainer: {
-    // borderWidth: 1,
-    marginLeft: 300,
-    marginTop: 20,
-    marginBottom: 4,
+  recentWhiskeyName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+    flex: 1,
   },
-  top3Container: {
-    marginTop: 270,
+  recentWhiskeyScore: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: Colors.gold,
+  },
+  noRecentText: {
+    fontSize: 16,
+    color: Colors.cream,
+    opacity: 0.8,
+  },
+  statsRow: {
     flexDirection: "row",
-    width: "100%",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    width: "90%",
+    marginTop: 12,
+    gap: 10,
   },
-  top3Text: {
-    fontSize: 20,
+  statBox: {
+    flex: 1,
+    backgroundColor: Colors.gold,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statTitle: {
+    fontSize: 11,
+    color: "#fff",
+    opacity: 0.9,
+    marginBottom: 2,
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  top3Box: {
+    width: "90%",
+    backgroundColor: Colors.copper,
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  top3Header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  top3Title: {
+    fontSize: 14,
+    color: Colors.cream,
+    opacity: 0.9,
   },
   viewAllText: {
     color: Colors.gold,
-    marginLeft: 75,
-    paddingTop: 4,
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: "600",
   },
-  title: {
+  whiskeyListContainer: {
+    minHeight: 140,
+  },
+  addWhiskeyButton: {
+    width: "90%",
+    backgroundColor: Colors.gold,
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 12,
+    marginBottom: 10,
     alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: 35,
-    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  titleText: {
-    fontSize: 20,
-    marginRight: 15,
-  },
-  whiskeyList: {
-    height: 260,
-    marginTop: 5,
-    width: "100%",
+  addWhiskeyText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });
 

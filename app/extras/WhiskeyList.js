@@ -131,7 +131,7 @@ function WhiskeyList(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.cream,
+    backgroundColor: "transparent",
   },
   loadingContainer: {
     flex: 1,
@@ -144,22 +144,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   noWhiskeysText: {
-    fontSize: 18,
-    color: Colors.darkGray,
+    fontSize: 16,
+    color: Colors.cream,
+    opacity: 0.8,
   },
   whiskeyItem: {
-    padding: 15,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: "rgba(255,255,255,0.2)",
   },
   whiskeyText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: Colors.primary,
+    color: "#fff",
   },
   whiskeyDetails: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: Colors.gold,
+    marginTop: 2,
   },
   additionalDetails: {
     marginTop: 10,
