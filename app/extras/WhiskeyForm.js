@@ -8,6 +8,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
+  Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
@@ -15,6 +17,7 @@ import { API_USER_NEW_WHISKEY } from "../../constants/Endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as ImagePicker from "expo-image-picker";
 
 function WhiskeyForm({ navigation }) {
   const [name, setName] = useState("");
@@ -24,6 +27,54 @@ function WhiskeyForm({ navigation }) {
   const [savedSmellingNotes, setSavedSmellingNotes] = useState([]);
   const [savedTastingNotes, setSavedTastingNotes] = useState([]);
   const [score, setScore] = useState(5);
+  const [image, setImage] = useState(null);
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission needed",
+        "Camera permission is required to take photos."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Photo library permission is required.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+  };
 
   const handleSmellingNoteSubmit = () => {
     if (smellingNotes.trim()) {
@@ -67,6 +118,7 @@ function WhiskeyForm({ navigation }) {
       smellingNotes: savedSmellingNotes.join(", "),
       tastingNotes: savedTastingNotes.join(", "),
       score: score,
+      image: image?.base64 ? `data:image/jpeg;base64,${image.base64}` : null,
     };
 
     try {
@@ -155,6 +207,46 @@ function WhiskeyForm({ navigation }) {
                 keyboardType="numeric"
               />
             </View>
+          </View>
+
+          {/* Photo Card */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Photo</Text>
+            {image ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.imagePreview}
+                />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={removeImage}
+                >
+                  <Ionicons
+                    name="close-circle"
+                    size={28}
+                    color={Colors.copper}
+                  />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.photoButtons}>
+                <TouchableOpacity
+                  style={styles.photoButton}
+                  onPress={takePhoto}
+                >
+                  <Ionicons name="camera" size={24} color="#fff" />
+                  <Text style={styles.photoButtonText}>Take Photo</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.photoButton}
+                  onPress={pickImage}
+                >
+                  <Ionicons name="images" size={24} color="#fff" />
+                  <Text style={styles.photoButtonText}>Choose Photo</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
           {/* Nose Card */}
@@ -387,6 +479,43 @@ const styles = StyleSheet.create({
     color: Colors.cream,
     opacity: 0.6,
     fontSize: 10,
+  },
+  photoButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  photoButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.gold,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  photoButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  imagePreviewContainer: {
+    position: "relative",
+    alignItems: "center",
+  },
+  imagePreview: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    resizeMode: "cover",
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#fff",
+    borderRadius: 14,
   },
   submitButton: {
     backgroundColor: Colors.gold,

@@ -1,4 +1,4 @@
-export const DOMAIN = "https://fcc54ab80a36.ngrok-free.app";
+export const DOMAIN = "https://6a37c26a4e46.ngrok-free.app";
 export const API_NEW_USER = DOMAIN + "/api/users";
 export const API_USER_SIGNIN = DOMAIN + "/api/login";
 export const API_VIEW_ALL = DOMAIN + "/api/view-all";
@@ -7,3 +7,13 @@ export const API_USER_NEW_WHISKEY = DOMAIN + "/api/user-whiskey";
 export const API_USER_WHISKEY_LIST = DOMAIN + "/api/user-whiskey-list";
 export const API_DELETE_WHISKEY = DOMAIN + "/api/delete-whiskey/:whiskeyId";
 export const API_USER_LOGOUT = DOMAIN + "/api/logout";
+
+// Friend-related endpoints
+export const API_SEARCH_USERS = DOMAIN + "/api/search-users";
+export const API_SEND_FRIEND_REQUEST = DOMAIN + "/api/send-friend-request";
+export const API_FRIEND_REQUESTS = DOMAIN + "/api/friend-requests";
+export const API_ACCEPT_FRIEND_REQUEST = DOMAIN + "/api/accept-friend-request";
+export const API_DENY_FRIEND_REQUEST = DOMAIN + "/api/deny-friend-request";
+export const API_FRIENDS_LIST = DOMAIN + "/api/friends-list";
+export const API_FRIEND_WHISKEYS = DOMAIN + "/api/friend-whiskeys/:friendId";
+export const API_REMOVE_FRIEND = DOMAIN + "/api/remove-friend";

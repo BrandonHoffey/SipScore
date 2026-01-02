@@ -8,6 +8,8 @@ import WhiskeyForm from "./app/extras/WhiskeyForm";
 import WhiskeyList from "./app/extras/WhiskeyList";
 import Loading from "./app/extras/Loading";
 import UserAllWhiskey from "./app/extras/UserAllWhiskey";
+import FriendsScreen from "./app/screens/FriendsScreen";
+import FriendWhiskeyList from "./app/extras/FriendWhiskeyList";
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +57,16 @@ const StackNavigator = () => {
       <Stack.Screen
         name="UserAllWhiskey"
         component={UserAllWhiskey}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FriendsScreen"
+        component={FriendsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FriendWhiskeyList"
+        component={FriendWhiskeyList}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

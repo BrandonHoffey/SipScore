@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { useUser } from "../../context/UserContext";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import WhiskeyList from "../extras/WhiskeyList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -73,6 +74,10 @@ function HomeScreen({ navigation }) {
 
   const handleUserAllWhiskey = () => {
     navigation.navigate("UserAllWhiskey");
+  };
+
+  const handleFriendsScreen = () => {
+    navigation.navigate("FriendsScreen");
   };
 
   const handleUserLogout = async () => {
@@ -169,6 +174,14 @@ function HomeScreen({ navigation }) {
           onPress={handleWhiskeyForm}
         >
           <Text style={styles.addWhiskeyText}>Add A New Whiskey</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.friendsButton}
+          onPress={handleFriendsScreen}
+        >
+          <Ionicons name="people" size={20} color="#fff" style={styles.friendsIcon} />
+          <Text style={styles.friendsButtonText}>Friends</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -348,6 +361,30 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   addWhiskeyText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  friendsButton: {
+    width: "90%",
+    flexDirection: "row",
+    backgroundColor: Colors.copper,
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  friendsIcon: {
+    marginRight: 8,
+  },
+  friendsButtonText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",

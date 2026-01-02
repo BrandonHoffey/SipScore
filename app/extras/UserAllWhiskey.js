@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   RefreshControl,
+  Image,
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -186,6 +187,14 @@ function UserAllWhiskey({ navigation }) {
                     )}
                   </View>
 
+                  {/* Photo */}
+                  {whiskey.image && (
+                    <Image
+                      source={{ uri: whiskey.image }}
+                      style={styles.whiskeyImage}
+                    />
+                  )}
+
                   {/* Card Details */}
                   <View style={styles.cardDetails}>
                     {whiskey.proof && (
@@ -319,16 +328,23 @@ const styles = StyleSheet.create({
   whiskeyCard: {
     backgroundColor: Colors.copper,
     borderRadius: 12,
-    padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
+    overflow: "hidden",
+  },
+  whiskeyImage: {
+    width: "100%",
+    height: 180,
+    resizeMode: "cover",
   },
   cardHeader: {
     marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   nameScoreRow: {
     flexDirection: "row",
@@ -363,6 +379,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.2)",
     paddingTop: 12,
+    paddingHorizontal: 16,
   },
   detailRow: {
     marginBottom: 8,
@@ -383,6 +400,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.2)",

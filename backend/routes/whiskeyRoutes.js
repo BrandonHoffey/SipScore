@@ -5,7 +5,7 @@ const Whiskey = require("../models/Whiskey");
 const UserWhiskey = require("../models/UserWhiskey");
 
 router.post("/user-whiskey", validateSession, async (req, res) => {
-  const { name, proof, smellingNotes, tastingNotes, score } = req.body;
+  const { name, proof, smellingNotes, tastingNotes, score, image } = req.body;
 
   if (!name || !proof || score === undefined) {
     return res.status(400).json({
@@ -21,10 +21,15 @@ router.post("/user-whiskey", validateSession, async (req, res) => {
   try {
     const userWhiskey = await UserWhiskey.findOne({ userId: req.user.id });
 
+    const whiskeyData = { name, proof, smellingNotes, tastingNotes, score };
+    if (image) {
+      whiskeyData.image = image;
+    }
+
     if (!userWhiskey) {
       const newUserWhiskey = new UserWhiskey({
         userId: req.user.id,
-        whiskeys: [{ name, proof, smellingNotes, tastingNotes, score }],
+        whiskeys: [whiskeyData],
       });
 
       await newUserWhiskey.save();
@@ -34,13 +39,7 @@ router.post("/user-whiskey", validateSession, async (req, res) => {
       });
     }
 
-    userWhiskey.whiskeys.push({
-      name,
-      proof,
-      smellingNotes,
-      tastingNotes,
-      score,
-    });
+    userWhiskey.whiskeys.push(whiskeyData);
     await userWhiskey.save();
 
     res.status(200).json({
