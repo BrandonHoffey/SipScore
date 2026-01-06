@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
@@ -57,7 +58,10 @@ function FriendsScreen({ navigation }) {
       setSearchResults(response.data.users);
     } catch (error) {
       console.error("Error searching users:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to search users");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to search users"
+      );
     } finally {
       setLoading(false);
     }
@@ -69,16 +73,19 @@ function FriendsScreen({ navigation }) {
       const headers = await getAuthHeaders();
       await axios.post(API_SEND_FRIEND_REQUEST, { userId }, { headers });
       Alert.alert("Success", "Friend request sent!");
-      
+
       // Update the search results to show pending status
-      setSearchResults(prev =>
-        prev.map(user =>
+      setSearchResults((prev) =>
+        prev.map((user) =>
           user._id === userId ? { ...user, status: "pending" } : user
         )
       );
     } catch (error) {
       console.error("Error sending friend request:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to send friend request");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to send friend request"
+      );
     }
   };
 
@@ -114,7 +121,10 @@ function FriendsScreen({ navigation }) {
       fetchFriends();
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to accept request");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to accept request"
+      );
     }
   };
 
@@ -127,7 +137,10 @@ function FriendsScreen({ navigation }) {
       fetchFriendRequests();
     } catch (error) {
       console.error("Error denying friend request:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to decline request");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to decline request"
+      );
     }
   };
 
@@ -203,7 +216,11 @@ function FriendsScreen({ navigation }) {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color={Colors.copper} style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={Colors.copper}
+          style={styles.loader}
+        />
       ) : (
         <ScrollView style={styles.resultsList}>
           {searchResults.length === 0 && searchQuery.length > 0 ? (
@@ -260,7 +277,11 @@ function FriendsScreen({ navigation }) {
     >
       {friendRequests.length === 0 ? (
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="account-clock" size={48} color={Colors.gray} />
+          <MaterialCommunityIcons
+            name="account-clock"
+            size={48}
+            color={Colors.gray}
+          />
           <Text style={styles.emptyStateText}>No pending friend requests</Text>
         </View>
       ) : (
@@ -312,9 +333,15 @@ function FriendsScreen({ navigation }) {
     >
       {friends.length === 0 ? (
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="account-group" size={48} color={Colors.gray} />
+          <MaterialCommunityIcons
+            name="account-group"
+            size={48}
+            color={Colors.gray}
+          />
           <Text style={styles.emptyStateText}>No friends yet</Text>
-          <Text style={styles.emptyStateSubtext}>Search for users to add friends</Text>
+          <Text style={styles.emptyStateSubtext}>
+            Search for users to add friends
+          </Text>
         </View>
       ) : (
         friends.map((friend) => (
@@ -323,21 +350,34 @@ function FriendsScreen({ navigation }) {
               style={styles.friendInfo}
               onPress={() => handleViewWhiskeys(friend)}
             >
-              <View style={styles.userAvatar}>
-                <Text style={styles.avatarText}>
-                  {friend.username.charAt(0).toUpperCase()}
-                </Text>
-              </View>
+              {friend.profilePicture ? (
+                <Image
+                  source={{ uri: friend.profilePicture }}
+                  style={styles.friendProfilePicture}
+                />
+              ) : (
+                <View style={styles.userAvatar}>
+                  <Text style={styles.avatarText}>
+                    {friend.username.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
               <View style={styles.friendDetails}>
                 <Text style={styles.username}>{friend.username}</Text>
-                <Text style={styles.viewWhiskeysText}>Tap to view whiskeys</Text>
+                <Text style={styles.viewWhiskeysText}>
+                  Tap to view whiskeys
+                </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.removeButton}
               onPress={() => handleRemoveFriend(friend._id, friend.username)}
             >
-              <MaterialCommunityIcons name="account-remove" size={20} color={Colors.copper} />
+              <MaterialCommunityIcons
+                name="account-remove"
+                size={20}
+                color={Colors.copper}
+              />
             </TouchableOpacity>
           </View>
         ))
@@ -373,7 +413,10 @@ function FriendsScreen({ navigation }) {
             color={activeTab === "search" ? "#fff" : Colors.copper}
           />
           <Text
-            style={[styles.tabText, activeTab === "search" && styles.activeTabText]}
+            style={[
+              styles.tabText,
+              activeTab === "search" && styles.activeTabText,
+            ]}
           >
             Search
           </Text>
@@ -388,7 +431,10 @@ function FriendsScreen({ navigation }) {
             color={activeTab === "requests" ? "#fff" : Colors.copper}
           />
           <Text
-            style={[styles.tabText, activeTab === "requests" && styles.activeTabText]}
+            style={[
+              styles.tabText,
+              activeTab === "requests" && styles.activeTabText,
+            ]}
           >
             Requests
             {friendRequests.length > 0 && (
@@ -406,7 +452,10 @@ function FriendsScreen({ navigation }) {
             color={activeTab === "friends" ? "#fff" : Colors.copper}
           />
           <Text
-            style={[styles.tabText, activeTab === "friends" && styles.activeTabText]}
+            style={[
+              styles.tabText,
+              activeTab === "friends" && styles.activeTabText,
+            ]}
           >
             Friends
           </Text>
@@ -577,6 +626,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  friendProfilePicture: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.gold,
+  },
   avatarText: {
     fontSize: 18,
     fontWeight: "bold",
@@ -670,4 +726,3 @@ const styles = StyleSheet.create({
 });
 
 export default FriendsScreen;
-

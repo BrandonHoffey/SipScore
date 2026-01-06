@@ -101,7 +101,9 @@ router.get("/view-all", validateSession, async (req, res) => {
 router.get("/current-account", validateSession, async (req, res) => {
   try {
     const id = req.user.id;
-    const user = await User.findById(id).select("username email password");
+    const user = await User.findById(id).select(
+      "username email profilePicture"
+    );
     if (!user) {
       console.error("User not found");
       return res.status(404).json({ error: "User not found" });
@@ -114,6 +116,101 @@ router.get("/current-account", validateSession, async (req, res) => {
   } catch (error) {
     console.error("Error fetching user account:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Update username
+router.put("/update-username", validateSession, async (req, res) => {
+  try {
+    const { newUsername } = req.body;
+    const userId = req.user.id;
+
+    if (!newUsername || newUsername.trim().length < 2) {
+      return res
+        .status(400)
+        .json({ message: "Username must be at least 2 characters" });
+    }
+
+    // Check if username is already taken
+    const existingUser = await User.findOne({ username: newUsername });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      return res.status(400).json({ message: "Username is already taken" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { username: newUsername },
+      { new: true }
+    ).select("username email profilePicture");
+
+    res.json({ message: "Username updated successfully", user });
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update password
+router.put("/update-password", validateSession, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Both current and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(userId);
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash and save new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update profile picture
+router.put("/update-profile-picture", validateSession, async (req, res) => {
+  try {
+    const { profilePicture } = req.body;
+    const userId = req.user.id;
+
+    if (!profilePicture) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profilePicture },
+      { new: true }
+    ).select("username email profilePicture");
+
+    res.json({ message: "Profile picture updated successfully", user });
+  } catch (error) {
+    console.error("Error updating profile picture:", error);
+    res.status(500).json({ message: error.message });
   }
 });
 

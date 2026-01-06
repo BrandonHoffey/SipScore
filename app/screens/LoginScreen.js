@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../context/UserContext";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
 import { Video, ResizeMode } from "expo-av";
 import {
@@ -77,13 +77,25 @@ function LoginScreen({ navigation }) {
       } else {
         await minLoadingTime;
         setLoading(false);
-        Alert.alert("Login Failed", "Invalid username or password.");
+        Alert.alert(
+          "Login Failed",
+          "The username or password is incorrect. Please try again."
+        );
       }
     } catch (error) {
       await minLoadingTime;
       setLoading(false);
       console.error("Login error:", error);
-      Alert.alert("Error", "Something went wrong. Please try again later.");
+
+      // Check if it's an authentication error (wrong username or password)
+      if (error.response?.status === 401 || error.response?.status === 404) {
+        Alert.alert(
+          "Login Failed",
+          "The username or password is incorrect. Please try again."
+        );
+      } else {
+        Alert.alert("Error", "Something went wrong. Please try again later.");
+      }
     }
   };
 

@@ -225,12 +225,13 @@ router.get("/friends-list", validateSession, async (req, res) => {
 
     const currentUser = await User.findById(currentUserId).populate(
       "friends",
-      "username _id"
+      "username _id profilePicture"
     );
 
     const friends = currentUser.friends.map((friend) => ({
       _id: friend._id,
       username: friend.username,
+      profilePicture: friend.profilePicture,
     }));
 
     res.json({ friends });

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
@@ -15,7 +16,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import WhiskeyList from "../extras/WhiskeyList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { API_USER_WHISKEY_LIST } from "../../constants/Endpoints";
+import {
+  API_USER_WHISKEY_LIST,
+  API_CURRENT_ACCOUNT,
+} from "../../constants/Endpoints";
 
 function HomeScreen({ navigation }) {
   const { user, logout } = useUser();
@@ -23,6 +27,7 @@ function HomeScreen({ navigation }) {
   const [recentWhiskey, setRecentWhiskey] = useState(null);
   const [totalSips, setTotalSips] = useState(0);
   const [averageScore, setAverageScore] = useState(0);
+  const [profilePicture, setProfilePicture] = useState(null);
 
   const fetchWhiskeyStats = async () => {
     try {
@@ -52,9 +57,27 @@ function HomeScreen({ navigation }) {
     }
   };
 
+  const fetchProfilePicture = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get(API_CURRENT_ACCOUNT, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200 && response.data.user?.profilePicture) {
+        setProfilePicture(response.data.user.profilePicture);
+      }
+    } catch (error) {
+      console.error("Error fetching profile picture:", error);
+    }
+  };
+
   const onRefresh = () => {
     setIsRefreshing(true);
     fetchWhiskeyStats();
+    fetchProfilePicture();
     setTimeout(() => {
       setIsRefreshing(false);
       console.log("Page refreshed");
@@ -65,6 +88,7 @@ function HomeScreen({ navigation }) {
     if (user) {
       console.log("Logged in user:", user);
       fetchWhiskeyStats();
+      fetchProfilePicture();
     }
   }, [user]);
 
@@ -78,6 +102,10 @@ function HomeScreen({ navigation }) {
 
   const handleFriendsScreen = () => {
     navigation.navigate("FriendsScreen");
+  };
+
+  const handleSettingsScreen = () => {
+    navigation.navigate("SettingsScreen");
   };
 
   const handleUserLogout = async () => {
@@ -103,23 +131,49 @@ function HomeScreen({ navigation }) {
           />
         }
       >
-        <View style={styles.headerContainer}>
-          <Text style={styles.sipScoreTitle}>SipScore</Text>
-          <View style={styles.logoutButton}>
-            <SimpleLineIcons
+        <View style={styles.iconsRow}>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity
+              onPress={handleFriendsScreen}
+              style={styles.headerIconButton}
+            >
+              <Ionicons name="people" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSettingsScreen}
+              style={styles.headerIconButton}
+            >
+              <Ionicons name="settings-outline" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleUserLogout}
-              name="logout"
-              size={24}
-              color="black"
-            />
+              style={styles.headerIconButton}
+            >
+              <SimpleLineIcons name="logout" size={22} color="black" />
+            </TouchableOpacity>
           </View>
+        </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.sipScoreTitle}>SipScore</Text>
         </View>
         <View style={styles.welcomeContainer}>
           {user ? (
-            <>
-              <Text style={styles.welcomeText}>Welcome</Text>
-              <Text style={styles.username}>{user.user.username}</Text>
-            </>
+            <View style={styles.welcomeRow}>
+              {profilePicture ? (
+                <Image
+                  source={{ uri: profilePicture }}
+                  style={styles.profilePicture}
+                />
+              ) : (
+                <View style={styles.profilePicturePlaceholder}>
+                  <Ionicons name="person" size={30} color={Colors.gray} />
+                </View>
+              )}
+              <View style={styles.welcomeTextContainer}>
+                <Text style={styles.welcomeText}>Welcome</Text>
+                <Text style={styles.username}>{user.user.username}</Text>
+              </View>
+            </View>
           ) : (
             <Text>Loading...</Text>
           )}
@@ -175,14 +229,6 @@ function HomeScreen({ navigation }) {
         >
           <Text style={styles.addWhiskeyText}>Add A New Whiskey</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.friendsButton}
-          onPress={handleFriendsScreen}
-        >
-          <Ionicons name="people" size={20} color="#fff" style={styles.friendsIcon} />
-          <Text style={styles.friendsButtonText}>Friends</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -203,37 +249,69 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     width: "100%",
-    paddingLeft: 20,
+    paddingHorizontal: 20,
     marginTop: 16,
+  },
+  welcomeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  profilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: Colors.copper,
+  },
+  profilePicturePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: Colors.copper,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  welcomeTextContainer: {
+    marginLeft: 12,
   },
   welcomeText: {
     fontSize: 18,
     color: Colors.gray,
   },
   username: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: "bold",
     color: Colors.copper,
-    marginTop: 4,
+    marginTop: 2,
   },
-  headerContainer: {
+  iconsRow: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  headerIcons: {
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 20,
+    gap: 16,
+  },
+  headerIconButton: {
+    padding: 4,
+  },
+  titleContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 8,
     marginBottom: 4,
-    position: "relative",
   },
   sipScoreTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.copper,
     textAlign: "center",
-  },
-  logoutButton: {
-    position: "absolute",
-    right: 20,
   },
   recentScoreBox: {
     width: "90%",
@@ -361,30 +439,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   addWhiskeyText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  friendsButton: {
-    width: "90%",
-    flexDirection: "row",
-    backgroundColor: Colors.copper,
-    borderRadius: 10,
-    padding: 14,
-    marginTop: 10,
-    marginBottom: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  friendsIcon: {
-    marginRight: 8,
-  },
-  friendsButtonText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
