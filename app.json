@@ -16,13 +16,20 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.bhoffey94.sipscore",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./app/assets/icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./app/assets/icon.png",
+      "name": "SipScore",
+      "shortName": "SipScore",
+      "description": "Rate and track your whiskey experiences",
+      "themeColor": "#B97A6A",
+      "backgroundColor": "#F8F1E5",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {
