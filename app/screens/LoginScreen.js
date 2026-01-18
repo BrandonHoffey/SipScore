@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../context/UserContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
-import { Video, ResizeMode } from "expo-av";
+import Loading from "../extras/Loading";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -102,16 +102,7 @@ function LoginScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <Modal visible={loading} transparent animationType="fade">
-        <View style={styles.loadingOverlay}>
-          <Video
-            source={require("../assets/SipScore-Loading-Animation.mp4")}
-            style={styles.loadingVideo}
-            resizeMode={ResizeMode.CONTAIN}
-            shouldPlay
-            isLooping
-          />
-          <Text style={styles.loadingText}>Signing you in...</Text>
-        </View>
+        <Loading fullScreen={true} message="Signing you in..." />
       </Modal>
 
       <View style={styles.titleContainer}>
@@ -164,22 +155,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: Colors.cream,
-  },
-  loadingOverlay: {
-    flex: 1,
-    backgroundColor: Colors.cream,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingVideo: {
-    width: wp("80%"),
-    height: hp("40%"),
-  },
-  loadingText: {
-    marginTop: 20,
-    fontSize: 18,
-    color: Colors.copper,
-    fontWeight: "600",
   },
   titleContainer: {
     marginBottom: 30,

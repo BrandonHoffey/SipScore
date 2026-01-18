@@ -1,4 +1,4 @@
-export const DOMAIN = "https://9db926663f58.ngrok-free.app";
+export const DOMAIN = "https://sipscore-backend.onrender.com";
 export const API_NEW_USER = DOMAIN + "/api/users";
 export const API_USER_SIGNIN = DOMAIN + "/api/login";
 export const API_VIEW_ALL = DOMAIN + "/api/view-all";

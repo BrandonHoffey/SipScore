@@ -10,7 +10,9 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Modal,
 } from "react-native";
+import Loading from "./Loading";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import { API_USER_NEW_WHISKEY } from "../../constants/Endpoints";
@@ -28,6 +30,7 @@ function WhiskeyForm({ navigation }) {
   const [savedTastingNotes, setSavedTastingNotes] = useState([]);
   const [score, setScore] = useState(5);
   const [image, setImage] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -112,6 +115,8 @@ function WhiskeyForm({ navigation }) {
       return;
     }
 
+    setSaving(true);
+
     const whiskeyData = {
       name,
       proof,
@@ -125,6 +130,7 @@ function WhiskeyForm({ navigation }) {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setSaving(false);
         throw new Error("No token found. Please login again.");
       }
 
@@ -141,12 +147,15 @@ function WhiskeyForm({ navigation }) {
 
       if (response.ok) {
         console.log("Whiskey added:", result);
+        setSaving(false);
         navigation.navigate("HomeScreen");
       } else {
+        setSaving(false);
         console.error("Failed to add whiskey:", result.message);
         alert(result.message || "Failed to add whiskey.");
       }
     } catch (error) {
+      setSaving(false);
       console.error("Error during API call:", error);
       alert("Something went wrong. Please try again.");
     }
@@ -158,6 +167,13 @@ function WhiskeyForm({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Saving overlay */}
+      <Modal visible={saving} transparent animationType="fade">
+        <View style={styles.savingOverlay}>
+          <Loading fullScreen={false} message="Saving whiskey..." />
+        </View>
+      </Modal>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -533,6 +549,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
+  },
+  savingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(248, 241, 229, 0.95)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

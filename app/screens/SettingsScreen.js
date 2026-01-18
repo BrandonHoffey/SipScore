@@ -8,10 +8,10 @@ import {
   ScrollView,
   Image,
   Alert,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import Loading from "../extras/Loading";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -226,9 +226,7 @@ function SettingsScreen({ navigation }) {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.copper} />
-        </View>
+        <Loading fullScreen={false} message="Loading settings..." />
       </SafeAreaView>
     );
   }
@@ -374,7 +372,7 @@ function SettingsScreen({ navigation }) {
 
         {saving && (
           <View style={styles.savingOverlay}>
-            <ActivityIndicator size="large" color={Colors.copper} />
+            <Loading fullScreen={false} message="Saving..." />
           </View>
         )}
       </KeyboardAvoidingView>
@@ -386,11 +384,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.cream,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   headerContainer: {
     flexDirection: "row",
